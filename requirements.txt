@@ -1,0 +1,4 @@
+Django
+reportlab
+django-environ
+openpyxl

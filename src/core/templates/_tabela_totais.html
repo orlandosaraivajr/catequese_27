@@ -1,0 +1,29 @@
+{% if totais %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-azul text-white">
+        <strong>{{ titulo }}</strong>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Turma / Horário</th>
+                    <th style="width: 150px;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in totais %}
+                <tr>
+                    <td>{{ item.titulo }}</td>
+                    <td>{{ item.quantidade }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    Nenhuma inscrição em {{ titulo }}.
+</div>
+{% endif %}

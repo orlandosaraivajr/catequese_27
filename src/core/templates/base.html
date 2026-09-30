@@ -1,0 +1,148 @@
+{% load static %}<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}Paróquia Nossa Senhora Aparecida{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --pnsa-azul: #1f3a6e;
+            --pnsa-azul-escuro: #11213f;
+            --pnsa-dourado: #c9a227;
+            --pnsa-creme: #f5f7fb;
+            --pnsa-texto: #1f2733;
+        }
+
+        body {
+            background: var(--pnsa-creme);
+            color: var(--pnsa-texto);
+            font-family: "Inter", "Segoe UI", sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, .brand-font {
+            font-family: "Source Serif 4", Georgia, serif;
+        }
+
+        .navbar-pnsa {
+            background: linear-gradient(135deg, var(--pnsa-azul), var(--pnsa-azul-escuro));
+        }
+        .navbar-pnsa .navbar-brand,
+        .navbar-pnsa .nav-link {
+            color: #dbe4f5 !important;
+        }
+        .navbar-pnsa .nav-link:hover {
+            color: #ffffff !important;
+        }
+
+        .btn-primary {
+            background-color: var(--pnsa-azul);
+            border-color: var(--pnsa-azul);
+        }
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: var(--pnsa-azul-escuro);
+            border-color: var(--pnsa-azul-escuro);
+        }
+        .btn-outline-primary {
+            color: var(--pnsa-azul);
+            border-color: var(--pnsa-azul);
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--pnsa-azul);
+            border-color: var(--pnsa-azul);
+        }
+        .text-dourado { color: var(--pnsa-dourado); }
+        .bg-azul { background-color: var(--pnsa-azul); }
+
+        .card {
+            border: none;
+            border-radius: 18px;
+        }
+
+        .card-brand-header {
+            border-top: 4px solid var(--pnsa-dourado);
+            border-radius: 18px 18px 0 0;
+        }
+
+        .hero-card {
+            transition: transform .2s, box-shadow .2s;
+        }
+        .hero-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        main { flex: 1; }
+
+        footer.pnsa-footer {
+            background: var(--pnsa-azul-escuro);
+            color: #dbe4f5;
+        }
+        footer.pnsa-footer a { color: var(--pnsa-dourado); }
+
+        .campo-obrigatorio::after {
+            content: " *";
+            color: var(--pnsa-azul);
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-md navbar-pnsa mb-0">
+    <div class="container">
+        <a class="navbar-brand brand-font fw-bold" href="{% url 'core:index' %}">
+            Paróquia N. Sra. Aparecida
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navPnsa">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navPnsa">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="{% url 'core:index' %}">Pré-Inscrição</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'core:secretaria' %}">Secretaria</a></li>
+                {% if user.is_authenticated and user.is_staff %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'core:dashboard_turmas' %}">Coordenação</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'admin:logout' %}">Sair</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<main>
+{% block conteudo %}{% endblock %}
+</main>
+
+<footer class="pnsa-footer py-4 mt-5">
+    <div class="container text-center small">
+        <p class="mb-1">Paróquia Nossa Senhora Aparecida &middot; Rio Claro/SP</p>
+        <a href="https://www.instagram.com/pnsa.rc/" target="_blank">Instagram da Paróquia</a>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

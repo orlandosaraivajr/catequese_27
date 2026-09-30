@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block titulo %}Pré-Inscrições - Paróquia Nossa Senhora Aparecida{% endblock %}
+
+{% block conteudo %}
+<div class="container py-5">
+
+    <h1 class="text-center mb-3 brand-font fw-bold">Pré-Inscrições<br>Paróquia Nossa Senhora Aparecida</h1>
+
+    <p class="text-center text-muted mb-5 fs-5">
+        Escolha abaixo qual ficha deseja acessar:
+    </p>
+
+    <div class="row justify-content-center g-4">
+
+        <div class="col-md-4">
+            <div class="card hero-card shadow-sm p-4 text-center h-100">
+                <h4 class="brand-font fw-bold mb-3">Catequese Infantil</h4>
+                <p class="text-muted mb-4">Inscrição para crianças.</p>
+                <a href="{% url 'core:catequese_infantil' %}" class="btn btn-primary btn-lg mt-auto">
+                    Acessar
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card hero-card shadow-sm p-4 text-center h-100">
+                <h4 class="brand-font fw-bold mb-3">Perseverança / MEJ</h4>
+                <p class="text-muted mb-4">Perseverança e Movimento Eucarístico Jovem.</p>
+                <a href="{% url 'core:perseveranca_mej' %}" class="btn btn-primary btn-lg mt-auto">
+                    Acessar
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card hero-card shadow-sm p-4 text-center h-100">
+                <h4 class="brand-font fw-bold mb-3">Catequese Adulto</h4>
+                <p class="text-muted mb-4">Inscrição para adultos.</p>
+                <a href="{% url 'core:catequese_adulto' %}" class="btn btn-primary btn-lg mt-auto">
+                    Acessar
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

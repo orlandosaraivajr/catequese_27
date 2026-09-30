@@ -1,0 +1,71 @@
+{% if fichas %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-azul text-white">
+        <strong>{{ titulo }}</strong>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>{{ coluna_nome|default:"Nome" }}</th>
+                    <th>Status</th>
+                    <th style="width: 130px;">Ação</th>
+                    <th style="width: 130px;"></th>
+                    <th style="width: 130px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ficha in fichas %}
+                <tr>
+                    <td>
+                        {% if is_noivos %}{{ ficha.nome_noivo }} e {{ ficha.nome_noiva }}{% else %}{{ ficha.nome }}{% endif %}
+                    </td>
+                    <td>
+                        {% if ficha.ficha_assinada %}
+                            <span class="badge text-bg-success">Assinada</span>
+                        {% elif ficha.ficha_impressa %}
+                            <span class="badge text-bg-warning">Impressa</span>
+                        {% else %}
+                            <span class="badge text-bg-secondary">Pendente</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="POST" action="{% url url_imprimir %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="ficha_id" value="{{ ficha.id }}">
+                            {% if ficha.ficha_impressa %}
+                                <button class="btn btn-warning btn-sm" type="submit">Reimprimir</button>
+                            {% else %}
+                                <button class="btn btn-primary btn-sm" type="submit">Imprimir</button>
+                            {% endif %}
+                        </form>
+                    </td>
+                    <td>
+                        {% if ficha.ficha_impressa %}
+                            <form method="POST" action="{% url url_assinar %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="ficha_id" value="{{ ficha.id }}">
+                                <button class="btn btn-outline-success btn-sm" type="submit">Assinada</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if ficha.ficha_impressa %}
+                            <form method="POST" action="{% url url_remover %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="ficha_id" value="{{ ficha.id }}">
+                                <button class="btn btn-outline-danger btn-sm" type="submit">Deletar</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    Nenhuma ficha {{ titulo }} pendente de impressão.
+</div>
+{% endif %}
