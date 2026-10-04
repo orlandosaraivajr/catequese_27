@@ -43,6 +43,9 @@ urlpatterns = [
     # Exportar Excel
     path('total', views.total, name='total'),
     path('excel', views.exportar_excel, name='exportar-excel'),
+    # Login / logout da coordenação
+    path('coordenacao', views.CoordenacaoLoginView.as_view(), name='coordenacao'),
+    path('coordenacao/sair', views.coordenacao_logout, name='coordenacao_logout'),
     # Dashboard da coordenação -- turmas da Catequese Infantil
     path('coordenacao/turmas', views.dashboard_turmas, name='dashboard_turmas'),
     path('coordenacao/turmas/nova', views.criar_turma, name='criar_turma'),

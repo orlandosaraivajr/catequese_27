@@ -1,11 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
+from django.contrib.auth.views import LoginView
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.utils.timezone import localtime
 from django.http import HttpResponse, FileResponse
 from django.db.models import Count
-from .forms import CatequeseInfantilForm, CrismaForm, PerseverancaMejForm, CatequeseAdultoForm, NoivoForm, CoroinhaForm, TurmaForm
+from .forms import CatequeseInfantilForm, CrismaForm, PerseverancaMejForm, CatequeseAdultoForm, NoivoForm, CoroinhaForm, TurmaForm, CoordenacaoLoginForm
 from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, Turma
 from .services import gerar_ficha_catequese, gerar_ficha_crisma, gerar_ficha_perseveranca_mej
 from .services import gerar_ficha_catequese_adulto, gerar_ficha_noivos ,  gerar_Workbook, gerar_ficha_coroinhas
@@ -341,16 +344,43 @@ def exportar_excel(request):
 
 
 # ---------------------------------------------------------------------------
+# Login / logout da coordenação
+# ---------------------------------------------------------------------------
+
+# Views da coordenação redirecionam para o login próprio, e não para o admin
+coordenacao_required = staff_member_required(login_url='core:coordenacao')
+
+
+class CoordenacaoLoginView(LoginView):
+    template_name = 'coordenacao_login.html'
+    authentication_form = CoordenacaoLoginForm
+
+    def dispatch(self, request, *args, **kwargs):
+        # Coordenadora já logada vai direto para a dashboard.
+        # (Usuário comum logado vê o formulário, evitando loop de redirect.)
+        if request.user.is_authenticated and request.user.is_staff:
+            return redirect(self.get_success_url())
+        return super().dispatch(request, *args, **kwargs)
+
+
+@require_POST
+def coordenacao_logout(request):
+    logout(request)
+    messages.info(request, 'Você saiu da área da coordenação.')
+    return redirect('core:coordenacao')
+
+
+# ---------------------------------------------------------------------------
 # Dashboard da coordenação -- turmas da Catequese Infantil
 # ---------------------------------------------------------------------------
 
-@staff_member_required
+@coordenacao_required
 def dashboard_turmas(request):
     turmas = Turma.objects.all()
     return render(request, 'dashboard_turmas.html', {'turmas': turmas})
 
 
-@staff_member_required
+@coordenacao_required
 def criar_turma(request):
     if request.method == 'POST':
         form = TurmaForm(request.POST)
@@ -363,7 +393,7 @@ def criar_turma(request):
     return render(request, 'turma_form.html', {'form': form, 'titulo': 'Nova turma'})
 
 
-@staff_member_required
+@coordenacao_required
 def editar_turma(request, turma_id):
     turma = get_object_or_404(Turma, id=turma_id)
     if request.method == 'POST':
@@ -377,7 +407,7 @@ def editar_turma(request, turma_id):
     return render(request, 'turma_form.html', {'form': form, 'titulo': f'Editar turma: {turma.nome}'})
 
 
-@staff_member_required
+@coordenacao_required
 def alternar_turma_ativa(request, turma_id):
     if request.method == 'POST':
         turma = get_object_or_404(Turma, id=turma_id)

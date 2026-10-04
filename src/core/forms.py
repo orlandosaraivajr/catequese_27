@@ -1,5 +1,6 @@
 from django import forms
 from django.forms import ModelForm
+from django.contrib.auth.forms import AuthenticationForm
 from datetime import date
 from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, Turma
 
@@ -159,17 +160,16 @@ class CatequeseInfantilForm(ModelForm):
         if not turma:
             raise forms.ValidationError("Selecione um horário para a catequese.")
 
+        # A turma aceita nascidos entre idade_maxima (mais antiga) e idade_minima (mais recente)
         data_nascimento = self.cleaned_data.get('data_nascimento')
         if data_nascimento:
-            ano_base = date.today().year
-            idade_projetada = ano_base - data_nascimento.year
-            if turma.idade_minima is not None and idade_projetada < turma.idade_minima:
+            if turma.idade_maxima is not None and data_nascimento < turma.idade_maxima:
                 raise forms.ValidationError(
-                    f"Pelo ano de nascimento, a turma \"{turma.nome}\" exige idade mínima de {turma.idade_minima} anos."
+                    f"A turma \"{turma.nome}\" aceita somente nascidos a partir de {turma.idade_maxima:%d/%m/%Y}."
                 )
-            if turma.idade_maxima is not None and idade_projetada > turma.idade_maxima:
+            if turma.idade_minima is not None and data_nascimento > turma.idade_minima:
                 raise forms.ValidationError(
-                    f"Pelo ano de nascimento, a turma \"{turma.nome}\" aceita até {turma.idade_maxima} anos."
+                    f"A turma \"{turma.nome}\" aceita somente nascidos até {turma.idade_minima:%d/%m/%Y}."
                 )
 
         # Ficha em edição não deve contar a própria inscrição contra o limite da turma.
@@ -842,14 +842,14 @@ class CoroinhaForm(ModelForm):
 class TurmaForm(ModelForm):
     class Meta:
         model = Turma
-        fields = ['nome', 'ativa', 'vagas_maximas', 'idade_minima', 'idade_maxima', 'ordem']
+        fields = ['nome', 'ativa', 'vagas_maximas', 'idade_maxima', 'idade_minima', 'ordem']
 
         labels = {
             'nome': 'Nome da turma/horário:',
             'ativa': 'Turma ativa (aparece no pré-cadastro)?',
             'vagas_maximas': 'Limite de vagas:',
-            'idade_minima': 'Idade mínima:',
-            'idade_maxima': 'Idade máxima:',
+            'idade_maxima': 'Nascidos a partir de (idade máxima):',
+            'idade_minima': 'Nascidos até (idade mínima):',
             'ordem': 'Ordem de exibição:',
         }
 
@@ -860,8 +860,8 @@ class TurmaForm(ModelForm):
             }),
             'ativa': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'vagas_maximas': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
-            'idade_minima': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
-            'idade_maxima': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'idade_maxima': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}, format='%Y-%m-%d'),
+            'idade_minima': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}, format='%Y-%m-%d'),
             'ordem': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
         }
 
@@ -869,6 +869,31 @@ class TurmaForm(ModelForm):
         cleaned_data = super().clean()
         idade_minima = cleaned_data.get('idade_minima')
         idade_maxima = cleaned_data.get('idade_maxima')
-        if idade_minima is not None and idade_maxima is not None and idade_minima > idade_maxima:
-            self.add_error('idade_maxima', 'A idade máxima não pode ser menor que a idade mínima.')
+        # idade_maxima é a data mais antiga; idade_minima, a mais recente
+        if idade_minima is not None and idade_maxima is not None and idade_maxima > idade_minima:
+            self.add_error(
+                'idade_minima',
+                'A data "Nascidos até" não pode ser anterior à data "Nascidos a partir de".',
+            )
         return cleaned_data
+
+
+class CoordenacaoLoginForm(AuthenticationForm):
+    """Login da coordenação: somente usuários staff podem entrar."""
+
+    error_messages = {
+        **AuthenticationForm.error_messages,
+        'nao_staff': 'Este usuário não tem acesso à área da coordenação.',
+    }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].label = 'Usuário'
+        self.fields['username'].widget.attrs.update({'class': 'form-control', 'autocomplete': 'username'})
+        self.fields['password'].label = 'Senha'
+        self.fields['password'].widget.attrs.update({'class': 'form-control', 'autocomplete': 'current-password'})
+
+    def confirm_login_allowed(self, user):
+        super().confirm_login_allowed(user)
+        if not user.is_staff:
+            raise forms.ValidationError(self.error_messages['nao_staff'], code='nao_staff')

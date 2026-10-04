@@ -18,7 +18,7 @@ class DashboardTurmasAcessoTest(TestCase):
     def test_anonimo_e_redirecionado_para_login(self):
         resp = self.client.get(self.url)
         self.assertEqual(resp.status_code, HTTPStatus.FOUND)
-        self.assertIn('/admin/login/', resp.url)
+        self.assertTrue(resp.url.startswith(r('core:coordenacao')))
 
     def test_usuario_comum_recebe_redirect(self):
         User.objects.create_user(username='comum', password='senha12345')

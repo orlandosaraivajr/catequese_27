@@ -198,6 +198,20 @@
         .btn-texto-vermelho { color: var(--gc-vermelho); background: transparent; border: 0; }
         .btn-texto-vermelho:hover { background: rgba(217, 48, 37, .06); color: var(--gc-vermelho); }
 
+        /* Área da usuária logada */
+        .gc-usuario-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gc-roxo);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            font-size: 1.125rem;
+        }
+
         /* ---------- Cards ---------- */
         .card {
             border: 1px solid var(--gc-borda);
@@ -507,12 +521,17 @@
                 <span class="material-symbols-outlined">school</span> Turmas
             </a>
             <hr>
-            <form method="POST" action="{% url 'admin:logout' %}">
+            <form method="POST" action="{% url 'core:coordenacao_logout' %}">
                 {% csrf_token %}
                 <button type="submit" class="gc-menu-item">
                     <span class="material-symbols-outlined">logout</span> Sair
                 </button>
             </form>
+            {% else %}
+            <hr>
+            <a class="gc-menu-item {% if rota == 'coordenacao' %}ativo{% endif %}" href="{% url 'core:coordenacao' %}">
+                <span class="material-symbols-outlined">login</span> Entrar (Coordenação)
+            </a>
             {% endif %}
         </div>
     </nav>
