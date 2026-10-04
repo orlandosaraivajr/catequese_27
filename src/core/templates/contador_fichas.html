@@ -12,22 +12,22 @@
 {% endblock %}
 
 {% block conteudo %}
-<div class="container py-5">
-    <h2 class="text-center mb-4 brand-font">{{ mensagem }}</h2>
+<div class="container py-4">
+    {% include "_banner.html" with cor="turquesa" icone="bar_chart" titulo="Totais de Inscrições" subtitulo=mensagem %}
 
-    {% with totais=total_catequese_infantil titulo="Catequese Infantil" %}
+    {% with totais=total_catequese_infantil cor="verde" titulo="Catequese Infantil" %}
         {% include "_tabela_totais.html" %}
     {% endwith %}
 
-    {% with totais=total_crisma titulo="Crisma" %}
+    {% with totais=total_crisma cor="laranja" titulo="Crisma" %}
         {% include "_tabela_totais.html" %}
     {% endwith %}
 
-    {% with totais=total_perseveranca_mej titulo="Perseverança / MEJ" %}
+    {% with totais=total_perseveranca_mej cor="azul" titulo="Perseverança / MEJ" %}
         {% include "_tabela_totais.html" %}
     {% endwith %}
 
-    {% with totais=total_catequese_adulto titulo="Catequese Adulto" %}
+    {% with totais=total_catequese_adulto cor="roxo" titulo="Catequese Adulto" %}
         {% include "_tabela_totais.html" %}
     {% endwith %}
 </div>

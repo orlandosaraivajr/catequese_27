@@ -8,139 +8,545 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" rel="stylesheet">
 
     <style>
+        /* Identidade visual inspirada no Google Classroom */
         :root {
-            --pnsa-azul: #1f3a6e;
-            --pnsa-azul-escuro: #11213f;
-            --pnsa-dourado: #c9a227;
-            --pnsa-creme: #f5f7fb;
-            --pnsa-texto: #1f2733;
+            --gc-azul: #1967d2;
+            --gc-azul-escuro: #185abc;
+            --gc-azul-claro: #e8f0fe;
+            --gc-verde: #1e8e3e;
+            --gc-laranja: #e8710a;
+            --gc-roxo: #8430ce;
+            --gc-rosa: #d01884;
+            --gc-turquesa: #129eaf;
+            --gc-vermelho: #d93025;
+            --gc-titulo: #202124;
+            --gc-texto: #3c4043;
+            --gc-texto-secundario: #5f6368;
+            --gc-borda: #dadce0;
+            --gc-fundo: #ffffff;
+            --gc-fundo-cinza: #f8f9fa;
+            --gc-topo-altura: 64px;
+            --gc-menu-largura: 300px;
         }
 
         body {
-            background: var(--pnsa-creme);
-            color: var(--pnsa-texto);
-            font-family: "Inter", "Segoe UI", sans-serif;
+            background: var(--gc-fundo);
+            color: var(--gc-texto);
+            font-family: "Google Sans", "Roboto", "Segoe UI", Arial, sans-serif;
+            font-size: .9375rem;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
 
-        h1, h2, h3, .brand-font {
-            font-family: "Source Serif 4", Georgia, serif;
+        h1, h2, h3, h4, h5, .brand-font {
+            font-family: "Google Sans", "Roboto", "Segoe UI", Arial, sans-serif;
+            color: var(--gc-titulo);
+            font-weight: 400;
         }
 
-        .navbar-pnsa {
-            background: linear-gradient(135deg, var(--pnsa-azul), var(--pnsa-azul-escuro));
+        a { color: var(--gc-azul); }
+
+        .material-symbols-outlined {
+            font-size: 1.375rem;
+            line-height: 1;
+            vertical-align: middle;
+            user-select: none;
         }
-        .navbar-pnsa .navbar-brand,
-        .navbar-pnsa .nav-link {
-            color: #dbe4f5 !important;
+
+        /* ---------- Barra superior ---------- */
+        .gc-topo {
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            height: var(--gc-topo-altura);
+            background: var(--gc-fundo);
+            border-bottom: 1px solid var(--gc-borda);
+            display: flex;
+            align-items: center;
+            padding: 0 .75rem;
+            gap: .5rem;
         }
-        .navbar-pnsa .nav-link:hover {
-            color: #ffffff !important;
+        .gc-topo .gc-marca {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            text-decoration: none;
+            color: var(--gc-texto-secundario);
+            font-size: 1.375rem;
         }
+        .gc-topo .gc-marca:hover { color: var(--gc-titulo); }
+        .gc-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: var(--gc-verde);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gc-btn-icone {
+            width: 48px;
+            height: 48px;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--gc-texto-secundario);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .15s;
+        }
+        .gc-btn-icone:hover { background: rgba(60, 64, 67, .08); }
+
+        /* ---------- Menu lateral ---------- */
+        .gc-layout { display: flex; flex: 1; }
+
+        .gc-menu.offcanvas-md { --bs-offcanvas-width: var(--gc-menu-largura); }
+        @media (min-width: 768px) {
+            .gc-menu {
+                width: var(--gc-menu-largura);
+                flex-shrink: 0;
+                border-right: 1px solid var(--gc-borda);
+                position: sticky;
+                top: var(--gc-topo-altura);
+                height: calc(100vh - var(--gc-topo-altura));
+                overflow-y: auto;
+            }
+        }
+        .gc-menu .offcanvas-body { padding: .5rem .75rem .5rem 0; flex-direction: column; }
+        .gc-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            height: 56px;
+            padding: 0 1.5rem;
+            border-radius: 0 28px 28px 0;
+            color: var(--gc-texto);
+            text-decoration: none;
+            font-weight: 500;
+            background: transparent;
+            border: 0;
+            width: 100%;
+            text-align: left;
+        }
+        .gc-menu-item .material-symbols-outlined { color: var(--gc-texto-secundario); }
+        .gc-menu-item:hover { background: rgba(60, 64, 67, .06); color: var(--gc-titulo); }
+        .gc-menu-item.ativo { background: var(--gc-azul-claro); color: var(--gc-azul); }
+        .gc-menu-item.ativo .material-symbols-outlined { color: var(--gc-azul); font-variation-settings: 'FILL' 1; }
+        .gc-menu-secao {
+            padding: 1rem 1.5rem .5rem;
+            font-size: .875rem;
+            font-weight: 500;
+            color: var(--gc-texto-secundario);
+        }
+        .gc-menu hr { margin: .5rem 0; border-color: var(--gc-borda); opacity: 1; }
+
+        .gc-conteudo { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+        main { flex: 1; }
+
+        /* ---------- Botões (estilo Material) ---------- */
+        .btn {
+            border-radius: 20px;
+            font-weight: 500;
+            letter-spacing: .01em;
+            padding: .5rem 1.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+        }
+        .btn-sm { padding: .3rem 1rem; font-size: .8125rem; }
+        .btn-lg { padding: .65rem 1.75rem; font-size: 1rem; }
+        .btn .material-symbols-outlined { font-size: 1.125rem; }
 
         .btn-primary {
-            background-color: var(--pnsa-azul);
-            border-color: var(--pnsa-azul);
+            background-color: var(--gc-azul);
+            border-color: var(--gc-azul);
         }
         .btn-primary:hover,
         .btn-primary:focus {
-            background-color: var(--pnsa-azul-escuro);
-            border-color: var(--pnsa-azul-escuro);
+            background-color: var(--gc-azul-escuro);
+            border-color: var(--gc-azul-escuro);
+            box-shadow: 0 1px 2px rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
         }
         .btn-outline-primary {
-            color: var(--pnsa-azul);
-            border-color: var(--pnsa-azul);
+            color: var(--gc-azul);
+            border-color: var(--gc-borda);
+            background: #fff;
         }
-        .btn-outline-primary:hover {
-            background-color: var(--pnsa-azul);
-            border-color: var(--pnsa-azul);
+        .btn-outline-primary:hover,
+        .btn-outline-primary:focus {
+            color: var(--gc-azul);
+            background-color: rgba(26, 115, 232, .04);
+            border-color: #d2e3fc;
         }
-        .text-dourado { color: var(--pnsa-dourado); }
-        .bg-azul { background-color: var(--pnsa-azul); }
+        .btn-texto {
+            color: var(--gc-azul);
+            background: transparent;
+            border: 0;
+        }
+        .btn-texto:hover { background: rgba(26, 115, 232, .06); color: var(--gc-azul-escuro); }
+        .btn-texto-verde { color: var(--gc-verde); background: transparent; border: 0; }
+        .btn-texto-verde:hover { background: rgba(30, 142, 62, .08); color: var(--gc-verde); }
+        .btn-texto-vermelho { color: var(--gc-vermelho); background: transparent; border: 0; }
+        .btn-texto-vermelho:hover { background: rgba(217, 48, 37, .06); color: var(--gc-vermelho); }
 
+        /* ---------- Cards ---------- */
         .card {
-            border: none;
-            border-radius: 18px;
+            border: 1px solid var(--gc-borda);
+            border-radius: 8px;
+            box-shadow: none;
         }
 
-        .card-brand-header {
-            border-top: 4px solid var(--pnsa-dourado);
-            border-radius: 18px 18px 0 0;
+        /* Card de turma (como na tela inicial do Classroom) */
+        .gc-turma {
+            border: 1px solid var(--gc-borda);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: box-shadow .2s;
+        }
+        .gc-turma:hover {
+            box-shadow: 0 1px 2px rgba(60,64,67,.3), 0 2px 6px 2px rgba(60,64,67,.15);
+        }
+        .gc-turma-faixa {
+            position: relative;
+            height: 100px;
+            padding: 1rem 1rem 0;
+            color: #fff;
+            background: var(--gc-cor, var(--gc-azul));
+            overflow: hidden;
+        }
+        .gc-turma-faixa a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.375rem;
+            line-height: 1.75rem;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            position: relative;
+            z-index: 1;
+        }
+        .gc-turma-faixa a:hover { text-decoration: underline; }
+        .gc-turma-faixa small { display: block; opacity: .9; position: relative; z-index: 1; }
+        .gc-turma-faixa .gc-ilustracao {
+            position: absolute;
+            right: -12px;
+            bottom: -24px;
+            font-size: 120px;
+            opacity: .18;
+        }
+        .gc-turma-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: var(--gc-cor, var(--gc-azul));
+            color: #fff;
+            border: 4px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: -36px 1rem 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+        .gc-turma-avatar .material-symbols-outlined { font-size: 2rem; }
+        .gc-turma-corpo { padding: .25rem 1rem 1rem; color: var(--gc-texto-secundario); flex: 1; }
+        .gc-turma-rodape {
+            border-top: 1px solid var(--gc-borda);
+            padding: .5rem;
+            display: flex;
+            justify-content: flex-end;
         }
 
-        .hero-card {
-            transition: transform .2s, box-shadow .2s;
+        /* Faixa grande do topo das páginas (como o mural da turma) */
+        .gc-banner {
+            position: relative;
+            border-radius: 8px;
+            min-height: 180px;
+            padding: 1.5rem;
+            color: #fff;
+            background: var(--gc-cor, var(--gc-azul));
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
         }
-        .hero-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        .gc-banner h1 {
+            color: #fff;
+            font-size: 2.25rem;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+        .gc-banner p { margin: .25rem 0 0; font-size: 1.125rem; opacity: .95; position: relative; z-index: 1; }
+        .gc-banner .gc-ilustracao {
+            position: absolute;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 160px;
+            opacity: .2;
         }
 
-        main { flex: 1; }
+        /* Cores por pastoral */
+        .cor-azul { --gc-cor: var(--gc-azul); }
+        .cor-verde { --gc-cor: var(--gc-verde); }
+        .cor-laranja { --gc-cor: var(--gc-laranja); }
+        .cor-roxo { --gc-cor: var(--gc-roxo); }
+        .cor-rosa { --gc-cor: var(--gc-rosa); }
+        .cor-turquesa { --gc-cor: var(--gc-turquesa); }
 
-        footer.pnsa-footer {
-            background: var(--pnsa-azul-escuro);
-            color: #dbe4f5;
+        /* Título de seção (como os "tópicos" da aba Atividades) */
+        .gc-topico {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            color: var(--gc-cor, var(--gc-azul));
+            border-bottom: 1px solid var(--gc-cor, var(--gc-azul));
+            padding-bottom: .5rem;
+            margin: 2rem 0 1rem;
         }
-        footer.pnsa-footer a { color: var(--pnsa-dourado); }
+        .gc-topico h2 {
+            color: inherit;
+            font-size: 1.75rem;
+            margin: 0;
+        }
+        .gc-topico .gc-contagem { font-size: .875rem; color: var(--gc-texto-secundario); }
+
+        /* ---------- Tabelas ---------- */
+        .gc-tabela {
+            border: 1px solid var(--gc-borda);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+        }
+        .gc-tabela .table { margin: 0; }
+        .gc-tabela .table > :not(caption) > * > * { padding: .75rem 1rem; border-color: var(--gc-borda); }
+        .gc-tabela thead th {
+            background: var(--gc-fundo-cinza);
+            color: var(--gc-texto-secundario);
+            font-weight: 500;
+            font-size: .8125rem;
+        }
+        .gc-tabela tbody tr:last-child > * { border-bottom: 0; }
+        .gc-tabela .table-hover > tbody > tr:hover > * { --bs-table-bg-state: var(--gc-fundo-cinza); }
+        .gc-acoes { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .25rem; }
+        .gc-acoes form { margin: 0; }
+
+        /* Chips de status */
+        .gc-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: .25rem;
+            padding: .15rem .65rem;
+            border-radius: 16px;
+            font-size: .75rem;
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+        .gc-chip .material-symbols-outlined { font-size: 1rem; }
+        .gc-chip-verde { color: #137333; background: #e6f4ea; }
+        .gc-chip-laranja { color: #b06000; background: #fef7e0; }
+        .gc-chip-vermelho { color: #c5221f; background: #fce8e6; }
+        .gc-chip-cinza { color: var(--gc-texto-secundario); background: #f1f3f4; }
+
+        /* Estado vazio */
+        .gc-vazio {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: 1rem 1.25rem;
+            border: 1px dashed var(--gc-borda);
+            border-radius: 8px;
+            color: var(--gc-texto-secundario);
+            margin-bottom: 1rem;
+        }
+
+        /* ---------- Formulários (campos com contorno) ---------- */
+        .form-label {
+            font-size: .875rem;
+            font-weight: 500;
+            color: var(--gc-texto-secundario);
+            margin-bottom: .35rem;
+        }
+        .form-control,
+        .form-select {
+            border: 1px solid var(--gc-borda);
+            border-radius: 4px;
+            padding: .7rem .9rem;
+            color: var(--gc-titulo);
+        }
+        .form-control:hover,
+        .form-select:hover { border-color: var(--gc-titulo); }
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--gc-azul);
+            box-shadow: inset 0 0 0 1px var(--gc-azul);
+        }
+        .form-check-input:checked { background-color: var(--gc-azul); border-color: var(--gc-azul); }
+        .form-check-input:focus { box-shadow: 0 0 0 .2rem rgba(26, 115, 232, .2); }
+        .form-text { color: var(--gc-texto-secundario); font-size: .8125rem; }
+        .gc-erro-campo { color: var(--gc-vermelho); font-size: .8125rem; margin-top: .25rem; display: flex; gap: .25rem; align-items: center; }
+        .gc-erro-campo .material-symbols-outlined { font-size: 1rem; }
 
         .campo-obrigatorio::after {
             content: " *";
-            color: var(--pnsa-azul);
+            color: var(--gc-vermelho);
         }
+
+        .gc-form-card { padding: 1.5rem; }
+        @media (min-width: 768px) { .gc-form-card { padding: 2rem 2.5rem; } }
+        .gc-form-acoes {
+            display: flex;
+            justify-content: flex-end;
+            gap: .5rem;
+            border-top: 1px solid var(--gc-borda);
+            padding-top: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        .alert { border-radius: 8px; }
+        .alert-danger { background: #fce8e6; border-color: #fad2cf; color: #a50e0e; }
+
+        /* ---------- Mensagens (snackbar) ---------- */
+        .gc-snackbars {
+            position: fixed;
+            left: 1.5rem;
+            bottom: 1.5rem;
+            z-index: 1080;
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+            max-width: min(568px, calc(100vw - 3rem));
+        }
+        .gc-snackbar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: .875rem 1rem;
+            background: #323232;
+            color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 3px 5px -1px rgba(0,0,0,.2), 0 6px 10px rgba(0,0,0,.14);
+            font-size: .875rem;
+        }
+        .gc-snackbar .material-symbols-outlined { font-size: 1.25rem; }
+        .gc-snackbar.error .material-symbols-outlined:first-child,
+        .gc-snackbar.danger .material-symbols-outlined:first-child { color: #f28b82; }
+        .gc-snackbar.success .material-symbols-outlined:first-child { color: #81c995; }
+        .gc-snackbar.warning .material-symbols-outlined:first-child { color: #fdd663; }
+        .gc-snackbar button {
+            margin-left: auto;
+            border: 0;
+            background: transparent;
+            color: #8ab4f8;
+            display: inline-flex;
+        }
+
+        /* ---------- Rodapé ---------- */
+        footer.gc-rodape {
+            border-top: 1px solid var(--gc-borda);
+            color: var(--gc-texto-secundario);
+            font-size: .8125rem;
+        }
+        footer.gc-rodape a { color: var(--gc-texto-secundario); text-decoration: none; }
+        footer.gc-rodape a:hover { color: var(--gc-azul); }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
 
 <body>
 
-<nav class="navbar navbar-expand-md navbar-pnsa mb-0">
-    <div class="container">
-        <a class="navbar-brand brand-font fw-bold" href="{% url 'core:index' %}">
-            Paróquia N. Sra. Aparecida
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navPnsa">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navPnsa">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="{% url 'core:index' %}">Pré-Inscrição</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'core:secretaria' %}">Secretaria</a></li>
-                {% if user.is_authenticated and user.is_staff %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'core:dashboard_turmas' %}">Coordenação</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'admin:logout' %}">Sair</a></li>
-                {% endif %}
-            </ul>
+{% with rota=request.resolver_match.url_name %}
+<header class="gc-topo">
+    <button class="gc-btn-icone d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuPnsa" aria-controls="menuPnsa" aria-label="Abrir menu">
+        <span class="material-symbols-outlined">menu</span>
+    </button>
+    <a class="gc-marca" href="{% url 'core:index' %}">
+        <span class="gc-logo"><span class="material-symbols-outlined">church</span></span>
+        <span class="d-none d-sm-inline">Paróquia N. Sra. Aparecida</span>
+        <span class="d-sm-none">PNSA</span>
+    </a>
+</header>
+
+<div class="gc-layout">
+    <nav class="gc-menu offcanvas-md offcanvas-start" tabindex="-1" id="menuPnsa" aria-label="Menu principal">
+        <div class="offcanvas-header d-md-none border-bottom">
+            <span class="gc-marca d-flex align-items-center gap-2">
+                <span class="gc-logo"><span class="material-symbols-outlined">church</span></span>
+                <span>Paróquia N. Sra. Aparecida</span>
+            </span>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#menuPnsa" aria-label="Fechar"></button>
         </div>
+        <div class="offcanvas-body d-flex">
+            <a class="gc-menu-item {% if rota == 'index' %}ativo{% endif %}" href="{% url 'core:index' %}">
+                <span class="material-symbols-outlined">home</span> Pré-Inscrição
+            </a>
+            <a class="gc-menu-item {% if rota == 'secretaria' or rota == 'listar_fichas' or rota == 'listar_todas_fichas' %}ativo{% endif %}" href="{% url 'core:secretaria' %}">
+                <span class="material-symbols-outlined">assignment</span> Secretaria
+            </a>
+            {% if user.is_authenticated and user.is_staff %}
+            <hr>
+            <div class="gc-menu-secao">Coordenação</div>
+            <a class="gc-menu-item {% if rota == 'dashboard_turmas' or rota == 'criar_turma' or rota == 'editar_turma' %}ativo{% endif %}" href="{% url 'core:dashboard_turmas' %}">
+                <span class="material-symbols-outlined">school</span> Turmas
+            </a>
+            <hr>
+            <form method="POST" action="{% url 'admin:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="gc-menu-item">
+                    <span class="material-symbols-outlined">logout</span> Sair
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="gc-conteudo">
+        <main>
+        {% block conteudo %}{% endblock %}
+        </main>
+
+        <footer class="gc-rodape py-3">
+            <div class="container d-flex flex-wrap justify-content-between gap-2">
+                <span>Paróquia Nossa Senhora Aparecida &middot; Rio Claro/SP</span>
+                <a href="https://www.instagram.com/pnsa.rc/" target="_blank" rel="noopener">
+                    <span class="material-symbols-outlined" style="font-size:1rem">photo_camera</span> Instagram da Paróquia
+                </a>
+            </div>
+        </footer>
     </div>
-</nav>
+</div>
+{% endwith %}
 
 {% if messages %}
-<div class="container mt-3">
+<div class="gc-snackbars" aria-live="polite">
     {% for message in messages %}
-    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    <div class="gc-snackbar {{ message.tags }}" role="alert">
+        <span class="material-symbols-outlined">{% if message.tags == 'success' %}check_circle{% elif message.tags == 'error' or message.tags == 'danger' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}</span>
+        <span>{{ message }}</span>
+        <button type="button" onclick="this.parentElement.remove()" aria-label="Fechar">
+            <span class="material-symbols-outlined">close</span>
+        </button>
     </div>
     {% endfor %}
 </div>
 {% endif %}
-
-<main>
-{% block conteudo %}{% endblock %}
-</main>
-
-<footer class="pnsa-footer py-4 mt-5">
-    <div class="container text-center small">
-        <p class="mb-1">Paróquia Nossa Senhora Aparecida &middot; Rio Claro/SP</p>
-        <a href="https://www.instagram.com/pnsa.rc/" target="_blank">Instagram da Paróquia</a>
-    </div>
-</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 {% block extra_js %}{% endblock %}

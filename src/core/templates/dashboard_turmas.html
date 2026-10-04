@@ -3,70 +3,82 @@
 {% block titulo %}Coordenação &middot; Turmas{% endblock %}
 
 {% block conteudo %}
-<div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="brand-font mb-0">Turmas &middot; Catequese Infantil</h2>
-        <a href="{% url 'core:criar_turma' %}" class="btn btn-primary">+ Nova turma</a>
+<div class="container py-4">
+    {% include "_banner.html" with cor="verde" icone="school" titulo="Turmas" subtitulo="Coordenação · Catequese Infantil" %}
+
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{% url 'core:criar_turma' %}" class="btn btn-primary">
+            <span class="material-symbols-outlined">add</span>Nova turma
+        </a>
     </div>
 
     {% if turmas %}
-    <div class="card shadow-sm">
-        <div class="card-body p-0">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Turma</th>
-                        <th>Idade</th>
-                        <th>Vagas</th>
-                        <th>Status</th>
-                        <th style="width: 220px;"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for turma in turmas %}
-                    <tr>
-                        <td>{{ turma.nome }}</td>
-                        <td>
-                            {% if turma.idade_minima or turma.idade_maxima %}
-                                {{ turma.idade_minima|default:"–" }} a {{ turma.idade_maxima|default:"–" }} anos
-                            {% else %}
-                                <span class="text-muted">sem restrição</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if turma.vagas_maximas %}
-                                {{ turma.vagas_ocupadas }} / {{ turma.vagas_maximas }}
-                                {% if turma.lotada %}<span class="badge text-bg-danger ms-1">Lotada</span>{% endif %}
-                            {% else %}
-                                {{ turma.vagas_ocupadas }} <span class="text-muted">(sem limite)</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if turma.ativa %}
-                                <span class="badge text-bg-success">Ativa</span>
-                            {% else %}
-                                <span class="badge text-bg-secondary">Inativa</span>
-                            {% endif %}
-                        </td>
-                        <td class="text-end">
-                            <a href="{% url 'core:editar_turma' turma.id %}" class="btn btn-outline-primary btn-sm">Editar</a>
-                            <form method="POST" action="{% url 'core:alternar_turma_ativa' turma.id %}" class="d-inline">
+    <div class="gc-tabela table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Turma</th>
+                    <th>Idade</th>
+                    <th>Vagas</th>
+                    <th>Status</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for turma in turmas %}
+                <tr>
+                    <td class="fw-medium">{{ turma.nome }}</td>
+                    <td>
+                        {% if turma.idade_minima or turma.idade_maxima %}
+                            {{ turma.idade_minima|default:"–" }} a {{ turma.idade_maxima|default:"–" }} anos
+                        {% else %}
+                            <span class="text-muted">sem restrição</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if turma.vagas_maximas %}
+                            {{ turma.vagas_ocupadas }} / {{ turma.vagas_maximas }}
+                            {% if turma.lotada %}<span class="gc-chip gc-chip-vermelho ms-1">Lotada</span>{% endif %}
+                        {% else %}
+                            {{ turma.vagas_ocupadas }} <span class="text-muted">(sem limite)</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if turma.ativa %}
+                            <span class="gc-chip gc-chip-verde">Ativa</span>
+                        {% else %}
+                            <span class="gc-chip gc-chip-cinza">Inativa</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="gc-acoes">
+                            <a href="{% url 'core:editar_turma' turma.id %}" class="btn btn-texto btn-sm">
+                                <span class="material-symbols-outlined">edit</span>Editar
+                            </a>
+                            <form method="POST" action="{% url 'core:alternar_turma_ativa' turma.id %}">
                                 {% csrf_token %}
                                 {% if turma.ativa %}
-                                    <button type="submit" class="btn btn-outline-secondary btn-sm">Desativar</button>
+                                    <button type="submit" class="btn btn-texto-vermelho btn-sm">
+                                        <span class="material-symbols-outlined">block</span>Desativar
+                                    </button>
                                 {% else %}
-                                    <button type="submit" class="btn btn-outline-success btn-sm">Ativar</button>
+                                    <button type="submit" class="btn btn-texto-verde btn-sm">
+                                        <span class="material-symbols-outlined">check_circle</span>Ativar
+                                    </button>
                                 {% endif %}
                             </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
     {% else %}
-    <div class="alert alert-info">Nenhuma turma cadastrada ainda.</div>
+    <div class="gc-vazio">
+        <span class="material-symbols-outlined">school</span>
+        Nenhuma turma cadastrada ainda.
+    </div>
     {% endif %}
 </div>
 {% endblock %}

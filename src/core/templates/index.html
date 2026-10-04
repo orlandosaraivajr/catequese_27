@@ -3,43 +3,57 @@
 {% block titulo %}Pré-Inscrições - Paróquia Nossa Senhora Aparecida{% endblock %}
 
 {% block conteudo %}
-<div class="container py-5">
+<div class="container py-4">
 
-    <h1 class="text-center mb-3 brand-font fw-bold">Pré-Inscrições<br>Paróquia Nossa Senhora Aparecida</h1>
+    <div class="mb-4">
+        <h1 class="h3 mb-1">Pré-Inscrições</h1>
+        <p class="text-muted mb-0">Escolha abaixo qual ficha deseja acessar.</p>
+    </div>
 
-    <p class="text-center text-muted mb-5 fs-5">
-        Escolha abaixo qual ficha deseja acessar:
-    </p>
+    <div class="row g-4">
 
-    <div class="row justify-content-center g-4">
-
-        <div class="col-md-4">
-            <div class="card hero-card shadow-sm p-4 text-center h-100">
-                <h4 class="brand-font fw-bold mb-3">Catequese Infantil</h4>
-                <p class="text-muted mb-4">Inscrição para crianças.</p>
-                <a href="{% url 'core:catequese_infantil' %}" class="btn btn-primary btn-lg mt-auto">
-                    Acessar
-                </a>
+        <div class="col-sm-6 col-lg-4 col-xl-3">
+            <div class="gc-turma cor-verde">
+                <div class="gc-turma-faixa">
+                    <span class="material-symbols-outlined gc-ilustracao" aria-hidden="true">child_care</span>
+                    <a href="{% url 'core:catequese_infantil' %}">Catequese Infantil</a>
+                    <small>Pré-Cadastro</small>
+                </div>
+                <div class="gc-turma-avatar"><span class="material-symbols-outlined">child_care</span></div>
+                <div class="gc-turma-corpo">Inscrição para crianças.</div>
+                <div class="gc-turma-rodape">
+                    <a href="{% url 'core:catequese_infantil' %}" class="btn btn-texto btn-sm">Acessar</a>
+                </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card hero-card shadow-sm p-4 text-center h-100">
-                <h4 class="brand-font fw-bold mb-3">Perseverança / MEJ</h4>
-                <p class="text-muted mb-4">Perseverança e Movimento Eucarístico Jovem.</p>
-                <a href="{% url 'core:perseveranca_mej' %}" class="btn btn-primary btn-lg mt-auto">
-                    Acessar
-                </a>
+        <div class="col-sm-6 col-lg-4 col-xl-3">
+            <div class="gc-turma cor-azul">
+                <div class="gc-turma-faixa">
+                    <span class="material-symbols-outlined gc-ilustracao" aria-hidden="true">groups</span>
+                    <a href="{% url 'core:perseveranca_mej' %}">Perseverança / MEJ</a>
+                    <small>Pré-Cadastro</small>
+                </div>
+                <div class="gc-turma-avatar"><span class="material-symbols-outlined">groups</span></div>
+                <div class="gc-turma-corpo">Perseverança e Movimento Eucarístico Jovem.</div>
+                <div class="gc-turma-rodape">
+                    <a href="{% url 'core:perseveranca_mej' %}" class="btn btn-texto btn-sm">Acessar</a>
+                </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card hero-card shadow-sm p-4 text-center h-100">
-                <h4 class="brand-font fw-bold mb-3">Catequese Adulto</h4>
-                <p class="text-muted mb-4">Inscrição para adultos.</p>
-                <a href="{% url 'core:catequese_adulto' %}" class="btn btn-primary btn-lg mt-auto">
-                    Acessar
-                </a>
+        <div class="col-sm-6 col-lg-4 col-xl-3">
+            <div class="gc-turma cor-roxo">
+                <div class="gc-turma-faixa">
+                    <span class="material-symbols-outlined gc-ilustracao" aria-hidden="true">menu_book</span>
+                    <a href="{% url 'core:catequese_adulto' %}">Catequese Adulto</a>
+                    <small>Pré-Cadastro</small>
+                </div>
+                <div class="gc-turma-avatar"><span class="material-symbols-outlined">menu_book</span></div>
+                <div class="gc-turma-corpo">Inscrição para adultos.</div>
+                <div class="gc-turma-rodape">
+                    <a href="{% url 'core:catequese_adulto' %}" class="btn btn-texto btn-sm">Acessar</a>
+                </div>
             </div>
         </div>
 

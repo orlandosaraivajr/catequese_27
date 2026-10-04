@@ -1,29 +1,31 @@
-{% if totais %}
-<div class="card shadow-sm mb-4">
-    <div class="card-header bg-azul text-white">
-        <strong>{{ titulo }}</strong>
+<section class="cor-{{ cor|default:'azul' }}">
+    <div class="gc-topico">
+        <h2>{{ titulo }}</h2>
     </div>
-    <div class="card-body p-0">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
+
+    {% if totais %}
+    <div class="gc-tabela table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
                 <tr>
                     <th>Turma / Horário</th>
-                    <th style="width: 150px;">Total</th>
+                    <th class="text-end" style="width: 150px;">Total</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in totais %}
                 <tr>
                     <td>{{ item.titulo }}</td>
-                    <td>{{ item.quantidade }}</td>
+                    <td class="text-end fw-medium">{{ item.quantidade }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-</div>
-{% else %}
-<div class="alert alert-info">
-    Nenhuma inscrição em {{ titulo }}.
-</div>
-{% endif %}
+    {% else %}
+    <div class="gc-vazio">
+        <span class="material-symbols-outlined">inbox</span>
+        Nenhuma inscrição em {{ titulo }}.
+    </div>
+    {% endif %}
+</section>

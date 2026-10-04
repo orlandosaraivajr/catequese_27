@@ -12,40 +12,40 @@
 {% endblock %}
 
 {% block conteudo %}
-<div class="container py-5">
-    <h2 class="text-center mb-4 brand-font">{{ mensagem }}</h2>
+<div class="container py-4">
+    {% include "_banner.html" with cor="azul" icone="assignment" titulo="Secretaria" subtitulo=mensagem %}
 
-    {% with titulo="Catequese Infantil" url_imprimir="core:imprimir_ficha" url_assinar="core:assinar_ficha" url_remover="core:remover_ficha" %}
-        {% include "_tabela_fichas.html" %}
-    {% endwith %}
-
-    {% with fichas=fichasCrisma titulo="Crisma" url_imprimir="core:imprimir_ficha_crisma" url_assinar="core:assinar_ficha_crisma" url_remover="core:remover_ficha_crisma" %}
-        {% include "_tabela_fichas.html" %}
-    {% endwith %}
-
-    {% with fichas=fichasMEJ titulo="Perseverança / MEJ" url_imprimir="core:imprimir_ficha_perseveranca_mej" url_assinar="core:assinar_ficha_perseveranca_mej" url_remover="core:remover_ficha_perseveranca_mej" %}
-        {% include "_tabela_fichas.html" %}
-    {% endwith %}
-
-    {% with fichas=fichasAdultos titulo="Catequese Adultos" url_imprimir="core:imprimir_ficha_adulto" url_assinar="core:assinar_ficha_adulto" url_remover="core:remover_ficha_adulto" %}
-        {% include "_tabela_fichas.html" %}
-    {% endwith %}
-
-    {% with fichas=fichasNoivos titulo="Casamento" coluna_nome="Noivos" is_noivos=True url_imprimir="core:imprimir_ficha_noivos" url_assinar="core:assinar_ficha_noivos" url_remover="core:remover_ficha_noivos" %}
-        {% include "_tabela_fichas.html" %}
-    {% endwith %}
-
-    {% with fichas=fichasCoroinhas titulo="Coroinhas" coluna_nome="Coroinha" url_imprimir="core:imprimir_ficha_coroinhas" url_assinar="core:assinar_ficha_coroinhas" url_remover="core:remover_ficha_coroinhas" %}
-        {% include "_tabela_fichas.html" %}
-    {% endwith %}
-
-    <div class="text-center mt-4">
-        <a href="{% url 'core:listar_fichas' %}" class="btn btn-outline-primary">
-            Somente Fichas Pendentes
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'core:listar_fichas' %}" class="btn btn-outline-primary btn-sm">
+            <span class="material-symbols-outlined">pending_actions</span>Somente Fichas Pendentes
         </a>
-        <a href="{% url 'core:listar_todas_fichas' %}" class="btn btn-outline-primary">
-            Todas as Fichas
+        <a href="{% url 'core:listar_todas_fichas' %}" class="btn btn-outline-primary btn-sm">
+            <span class="material-symbols-outlined">list_alt</span>Todas as Fichas
         </a>
     </div>
+
+    {% with cor="verde" titulo="Catequese Infantil" url_imprimir="core:imprimir_ficha" url_assinar="core:assinar_ficha" url_remover="core:remover_ficha" %}
+        {% include "_tabela_fichas.html" %}
+    {% endwith %}
+
+    {% with fichas=fichasCrisma cor="laranja" titulo="Crisma" url_imprimir="core:imprimir_ficha_crisma" url_assinar="core:assinar_ficha_crisma" url_remover="core:remover_ficha_crisma" %}
+        {% include "_tabela_fichas.html" %}
+    {% endwith %}
+
+    {% with fichas=fichasMEJ cor="azul" titulo="Perseverança / MEJ" url_imprimir="core:imprimir_ficha_perseveranca_mej" url_assinar="core:assinar_ficha_perseveranca_mej" url_remover="core:remover_ficha_perseveranca_mej" %}
+        {% include "_tabela_fichas.html" %}
+    {% endwith %}
+
+    {% with fichas=fichasAdultos cor="roxo" titulo="Catequese Adultos" url_imprimir="core:imprimir_ficha_adulto" url_assinar="core:assinar_ficha_adulto" url_remover="core:remover_ficha_adulto" %}
+        {% include "_tabela_fichas.html" %}
+    {% endwith %}
+
+    {% with fichas=fichasNoivos cor="rosa" titulo="Casamento" coluna_nome="Noivos" is_noivos=True url_imprimir="core:imprimir_ficha_noivos" url_assinar="core:assinar_ficha_noivos" url_remover="core:remover_ficha_noivos" %}
+        {% include "_tabela_fichas.html" %}
+    {% endwith %}
+
+    {% with fichas=fichasCoroinhas cor="turquesa" titulo="Coroinhas" coluna_nome="Coroinha" url_imprimir="core:imprimir_ficha_coroinhas" url_assinar="core:assinar_ficha_coroinhas" url_remover="core:remover_ficha_coroinhas" %}
+        {% include "_tabela_fichas.html" %}
+    {% endwith %}
 </div>
 {% endblock %}

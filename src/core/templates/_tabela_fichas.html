@@ -1,17 +1,17 @@
-{% if fichas %}
-<div class="card shadow-sm mb-4">
-    <div class="card-header bg-azul text-white">
-        <strong>{{ titulo }}</strong>
+<section class="cor-{{ cor|default:'azul' }}">
+    <div class="gc-topico">
+        <h2>{{ titulo }}</h2>
+        {% if fichas %}<span class="gc-contagem">{{ fichas|length }} ficha{{ fichas|length|pluralize }}</span>{% endif %}
     </div>
-    <div class="card-body p-0">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
+
+    {% if fichas %}
+    <div class="gc-tabela table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
                 <tr>
                     <th>{{ coluna_nome|default:"Nome" }}</th>
                     <th>Status</th>
-                    <th style="width: 130px;">Ação</th>
-                    <th style="width: 130px;"></th>
-                    <th style="width: 130px;"></th>
+                    <th class="text-end">Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -22,50 +22,55 @@
                     </td>
                     <td>
                         {% if ficha.ficha_assinada %}
-                            <span class="badge text-bg-success">Assinada</span>
+                            <span class="gc-chip gc-chip-verde"><span class="material-symbols-outlined">task_alt</span>Assinada</span>
                         {% elif ficha.ficha_impressa %}
-                            <span class="badge text-bg-warning">Impressa</span>
+                            <span class="gc-chip gc-chip-laranja"><span class="material-symbols-outlined">print</span>Impressa</span>
                         {% else %}
-                            <span class="badge text-bg-secondary">Pendente</span>
+                            <span class="gc-chip gc-chip-cinza"><span class="material-symbols-outlined">schedule</span>Pendente</span>
                         {% endif %}
                     </td>
                     <td>
-                        <form method="POST" action="{% url url_imprimir %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="ficha_id" value="{{ ficha.id }}">
+                        <div class="gc-acoes">
+                            <form method="POST" action="{% url url_imprimir %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="ficha_id" value="{{ ficha.id }}">
+                                {% if ficha.ficha_impressa %}
+                                    <button class="btn btn-outline-primary btn-sm" type="submit">
+                                        <span class="material-symbols-outlined">print</span>Reimprimir
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-primary btn-sm" type="submit">
+                                        <span class="material-symbols-outlined">print</span>Imprimir
+                                    </button>
+                                {% endif %}
+                            </form>
                             {% if ficha.ficha_impressa %}
-                                <button class="btn btn-warning btn-sm" type="submit">Reimprimir</button>
-                            {% else %}
-                                <button class="btn btn-primary btn-sm" type="submit">Imprimir</button>
+                                <form method="POST" action="{% url url_assinar %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="ficha_id" value="{{ ficha.id }}">
+                                    <button class="btn btn-texto-verde btn-sm" type="submit">
+                                        <span class="material-symbols-outlined">task_alt</span>Assinada
+                                    </button>
+                                </form>
+                                <form method="POST" action="{% url url_remover %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="ficha_id" value="{{ ficha.id }}">
+                                    <button class="btn btn-texto-vermelho btn-sm" type="submit">
+                                        <span class="material-symbols-outlined">delete</span>Deletar
+                                    </button>
+                                </form>
                             {% endif %}
-                        </form>
-                    </td>
-                    <td>
-                        {% if ficha.ficha_impressa %}
-                            <form method="POST" action="{% url url_assinar %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="ficha_id" value="{{ ficha.id }}">
-                                <button class="btn btn-outline-success btn-sm" type="submit">Assinada</button>
-                            </form>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if ficha.ficha_impressa %}
-                            <form method="POST" action="{% url url_remover %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="ficha_id" value="{{ ficha.id }}">
-                                <button class="btn btn-outline-danger btn-sm" type="submit">Deletar</button>
-                            </form>
-                        {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-</div>
-{% else %}
-<div class="alert alert-info">
-    Nenhuma ficha {{ titulo }} pendente de impressão.
-</div>
-{% endif %}
+    {% else %}
+    <div class="gc-vazio">
+        <span class="material-symbols-outlined">inbox</span>
+        Nenhuma ficha {{ titulo }} pendente de impressão.
+    </div>
+    {% endif %}
+</section>

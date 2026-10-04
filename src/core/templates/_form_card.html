@@ -1,0 +1,23 @@
+<div class="card gc-form-card">
+    <form method="POST" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger d-flex gap-2">
+                <span class="material-symbols-outlined">error</span>
+                <ul class="mb-0 ps-3">
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        {% include "_form_fields.html" %}
+
+        <div class="gc-form-acoes">
+            <a href="{% url url_voltar %}" class="btn btn-texto">Voltar</a>
+            <button type="submit" class="btn btn-primary">{{ texto_botao|default:"Salvar" }}</button>
+        </div>
+    </form>
+</div>
