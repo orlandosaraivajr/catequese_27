@@ -4,6 +4,8 @@ from django.shortcuts import resolve_url as r
 from django.http import FileResponse
 from unittest.mock import patch
 from datetime import date
+import os
+import tempfile
 
 from core.models import CatequeseInfantilModel, Turma
 
@@ -58,14 +60,21 @@ class ImprimirFichaPostTest(TestCase):
         - se foi retornado um FileResponse
         """
 
-        # O mock retorna um caminho fake de PDF
-        mock_pdf.return_value = "/tmp/ficha_teste.pdf"
+        # Diretório temporário multiplataforma (Windows/Linux), removido ao final
+        tmp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp_dir.cleanup)
+        pdf_path = os.path.join(tmp_dir.name, "ficha_teste.pdf")
 
         # Criar arquivo fake
-        with open("/tmp/ficha_teste.pdf", "wb") as f:
+        with open(pdf_path, "wb") as f:
             f.write(b"PDF TESTE")
 
+        # O mock retorna o caminho do PDF fake
+        mock_pdf.return_value = pdf_path
+
         resp = self.client.post(self.url, {"ficha_id": self.ficha.id})
+        # Fecha o arquivo aberto pelo FileResponse (no Windows, arquivo aberto não pode ser apagado)
+        self.addCleanup(resp.close)
 
         # --- Verificar se a view retornou um FileResponse ---
         self.assertIsInstance(resp, FileResponse)
