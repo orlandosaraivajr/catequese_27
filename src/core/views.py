@@ -8,8 +8,8 @@ from django.contrib import messages
 from django.utils.timezone import localtime
 from django.http import HttpResponse, FileResponse
 from django.db.models import Count
-from .forms import CatequeseInfantilForm, CrismaForm, PerseverancaMejForm, CatequeseAdultoForm, NoivoForm, CoroinhaForm, TurmaForm, CoordenacaoLoginForm
-from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil
+from .forms import CatequeseInfantilForm, CrismaForm, PerseverancaMejForm, CatequeseAdultoForm, NoivoForm, CoroinhaForm, TurmaForm, TurmaCrismaForm, CoordenacaoLoginForm
+from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil, TurmaCrisma
 from .services import gerar_ficha_catequese, gerar_ficha_crisma, gerar_ficha_perseveranca_mej
 from .services import gerar_ficha_catequese_adulto, gerar_ficha_noivos ,  gerar_Workbook, gerar_ficha_coroinhas
 
@@ -279,14 +279,13 @@ def total(request):
     # Crisma
     qs = (
         CrismaModel.objects
-        .values('horario')
+        .values('turma__nome')
         .annotate(quantidade=Count('id'))
         .order_by('-quantidade')
     )
-    horarios_dict = dict(CrismaModel.HORARIO_CRISMA)
     total_crisma = [
         {
-            "titulo": horarios_dict.get(item["horario"]),
+            "titulo": item["turma__nome"],
             "quantidade": item["quantidade"]
         }
         for item in qs
@@ -371,46 +370,113 @@ def coordenacao_logout(request):
 
 
 # ---------------------------------------------------------------------------
-# Dashboard da coordenação -- turmas da Catequese Infantil
+# Dashboard da coordenação -- turmas da Catequese Infantil e da Crisma
 # ---------------------------------------------------------------------------
 
-@coordenacao_required
-def dashboard_turmas(request):
-    turmas = TurmaCatequeseInfantil.objects.all()
-    return render(request, 'dashboard_turmas.html', {'turmas': turmas})
+# Tudo o que muda entre os dashboards de turmas: modelo, formulário, textos e
+# nomes das rotas (usados nos redirects e nos templates).
+TURMAS_CATEQUESE = {
+    'modelo': TurmaCatequeseInfantil,
+    'form': TurmaForm,
+    'titulo': 'Turmas Catequese',
+    'subtitulo': 'Coordenação · Catequese Infantil',
+    'url_dashboard': 'core:dashboard_turmas_catequese',
+    'url_criar': 'core:criar_turma_catequese',
+    'url_editar': 'core:editar_turma_catequese',
+    'url_alternar': 'core:alternar_turma_catequese_ativa',
+}
+
+TURMAS_CRISMA = {
+    'modelo': TurmaCrisma,
+    'form': TurmaCrismaForm,
+    'titulo': 'Turmas Crisma',
+    'subtitulo': 'Coordenação · Crisma',
+    'url_dashboard': 'core:dashboard_turmas_crisma',
+    'url_criar': 'core:criar_turma_crisma',
+    'url_editar': 'core:editar_turma_crisma',
+    'url_alternar': 'core:alternar_turma_crisma_ativa',
+}
 
 
-@coordenacao_required
-def criar_turma(request):
+def _contexto_turmas(config, **extra):
+    contexto = {k: v for k, v in config.items() if k not in ('modelo', 'form')}
+    contexto.update(extra)
+    return contexto
+
+
+def _dashboard_turmas(request, config):
+    turmas = config['modelo'].objects.all()
+    return render(request, 'dashboard_turmas.html', _contexto_turmas(config, turmas=turmas))
+
+
+def _criar_turma(request, config):
     if request.method == 'POST':
-        form = TurmaForm(request.POST)
+        form = config['form'](request.POST)
         if form.is_valid():
             form.save()
             messages.success(request, 'Turma criada com sucesso.')
-            return redirect('core:dashboard_turmas')
+            return redirect(config['url_dashboard'])
     else:
-        form = TurmaForm()
-    return render(request, 'turma_form.html', {'form': form, 'titulo': 'Nova turma'})
+        form = config['form']()
+    return render(request, 'turma_form.html', _contexto_turmas(config, form=form, titulo='Nova turma'))
 
 
-@coordenacao_required
-def editar_turma(request, turma_id):
-    turma = get_object_or_404(TurmaCatequeseInfantil, id=turma_id)
+def _editar_turma(request, config, turma_id):
+    turma = get_object_or_404(config['modelo'], id=turma_id)
     if request.method == 'POST':
-        form = TurmaForm(request.POST, instance=turma)
+        form = config['form'](request.POST, instance=turma)
         if form.is_valid():
             form.save()
             messages.success(request, 'Turma atualizada com sucesso.')
-            return redirect('core:dashboard_turmas')
+            return redirect(config['url_dashboard'])
     else:
-        form = TurmaForm(instance=turma)
-    return render(request, 'turma_form.html', {'form': form, 'titulo': f'Editar turma: {turma.nome}'})
+        form = config['form'](instance=turma)
+    return render(request, 'turma_form.html', _contexto_turmas(config, form=form, titulo=f'Editar turma: {turma.nome}'))
+
+
+def _alternar_turma_ativa(request, config, turma_id):
+    if request.method == 'POST':
+        turma = get_object_or_404(config['modelo'], id=turma_id)
+        turma.ativa = not turma.ativa
+        turma.save()
+    return redirect(config['url_dashboard'])
 
 
 @coordenacao_required
-def alternar_turma_ativa(request, turma_id):
-    if request.method == 'POST':
-        turma = get_object_or_404(TurmaCatequeseInfantil, id=turma_id)
-        turma.ativa = not turma.ativa
-        turma.save()
-    return redirect('core:dashboard_turmas')
+def dashboard_turmas_catequese(request):
+    return _dashboard_turmas(request, TURMAS_CATEQUESE)
+
+
+@coordenacao_required
+def criar_turma_catequese(request):
+    return _criar_turma(request, TURMAS_CATEQUESE)
+
+
+@coordenacao_required
+def editar_turma_catequese(request, turma_id):
+    return _editar_turma(request, TURMAS_CATEQUESE, turma_id)
+
+
+@coordenacao_required
+def alternar_turma_catequese_ativa(request, turma_id):
+    return _alternar_turma_ativa(request, TURMAS_CATEQUESE, turma_id)
+
+
+@coordenacao_required
+def dashboard_turmas_crisma(request):
+    return _dashboard_turmas(request, TURMAS_CRISMA)
+
+
+@coordenacao_required
+def criar_turma_crisma(request):
+    return _criar_turma(request, TURMAS_CRISMA)
+
+
+@coordenacao_required
+def editar_turma_crisma(request, turma_id):
+    return _editar_turma(request, TURMAS_CRISMA, turma_id)
+
+
+@coordenacao_required
+def alternar_turma_crisma_ativa(request, turma_id):
+    return _alternar_turma_ativa(request, TURMAS_CRISMA, turma_id)

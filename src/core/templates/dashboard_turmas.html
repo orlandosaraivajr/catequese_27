@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block titulo %}Coordenação &middot; Turmas{% endblock %}
+{% block titulo %}Coordenação &middot; {{ titulo }}{% endblock %}
 
 {% block conteudo %}
 <div class="container py-4">
-    {% include "_banner.html" with cor="verde" icone="school" titulo="Turmas" subtitulo="Coordenação · Catequese Infantil" %}
+    {% include "_banner.html" with cor="verde" icone="school" titulo=titulo subtitulo=subtitulo %}
 
     <div class="card gc-usuario mb-4">
         <div class="d-flex flex-wrap align-items-center gap-3 p-3">
@@ -23,7 +23,7 @@
     </div>
 
     <div class="d-flex justify-content-end mb-3">
-        <a href="{% url 'core:criar_turma' %}" class="btn btn-primary">
+        <a href="{% url url_criar %}" class="btn btn-primary">
             <span class="material-symbols-outlined">add</span>Nova turma
         </a>
     </div>
@@ -68,10 +68,10 @@
                     </td>
                     <td>
                         <div class="gc-acoes">
-                            <a href="{% url 'core:editar_turma' turma.id %}" class="btn btn-texto btn-sm">
+                            <a href="{% url url_editar turma.id %}" class="btn btn-texto btn-sm">
                                 <span class="material-symbols-outlined">edit</span>Editar
                             </a>
-                            <form method="POST" action="{% url 'core:alternar_turma_ativa' turma.id %}">
+                            <form method="POST" action="{% url url_alternar turma.id %}">
                                 {% csrf_token %}
                                 {% if turma.ativa %}
                                     <button type="submit" class="btn btn-texto-vermelho btn-sm">

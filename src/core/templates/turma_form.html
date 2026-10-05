@@ -4,7 +4,7 @@
 
 {% block conteudo %}
 <div class="container py-4" style="max-width: 820px;">
-    {% include "_banner.html" with cor="azul" icone="school" titulo=titulo subtitulo="Coordenação · Catequese Infantil" %}
-    {% include "_form_card.html" with texto_botao="Salvar" url_voltar="core:dashboard_turmas" %}
+    {% include "_banner.html" with cor="azul" icone="school" titulo=titulo subtitulo=subtitulo %}
+    {% include "_form_card.html" with texto_botao="Salvar" url_voltar=url_dashboard %}
 </div>
 {% endblock %}

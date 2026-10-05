@@ -47,8 +47,14 @@ urlpatterns = [
     path('coordenacao', views.CoordenacaoLoginView.as_view(), name='coordenacao'),
     path('coordenacao/sair', views.coordenacao_logout, name='coordenacao_logout'),
     # Dashboard da coordenação -- turmas da Catequese Infantil
-    path('coordenacao/turmas', views.dashboard_turmas, name='dashboard_turmas'),
-    path('coordenacao/turmas/nova', views.criar_turma, name='criar_turma'),
-    path('coordenacao/turmas/<int:turma_id>/editar', views.editar_turma, name='editar_turma'),
-    path('coordenacao/turmas/<int:turma_id>/alternar', views.alternar_turma_ativa, name='alternar_turma_ativa'),
+    path('coordenacao/turmas_catequese', views.dashboard_turmas_catequese, name='dashboard_turmas_catequese'),
+    path('coordenacao/turmas_catequese/nova', views.criar_turma_catequese, name='criar_turma_catequese'),
+    path('coordenacao/turmas_catequese/<int:turma_id>/editar', views.editar_turma_catequese, name='editar_turma_catequese'),
+    path('coordenacao/turmas_catequese/<int:turma_id>/alternar', views.alternar_turma_catequese_ativa, name='alternar_turma_catequese_ativa'),
+
+    # Dashboard da coordenação -- turmas da Crisma
+    path('coordenacao/turmas_crisma', views.dashboard_turmas_crisma, name='dashboard_turmas_crisma'),
+    path('coordenacao/turmas_crisma/nova', views.criar_turma_crisma, name='criar_turma_crisma'),
+    path('coordenacao/turmas_crisma/<int:turma_id>/editar', views.editar_turma_crisma, name='editar_turma_crisma'),
+    path('coordenacao/turmas_crisma/<int:turma_id>/alternar', views.alternar_turma_crisma_ativa, name='alternar_turma_crisma_ativa'),
 ]

@@ -2,12 +2,15 @@ from django.db import models
 from django.utils import timezone
 
 
-class TurmaCatequeseInfantil(models.Model):
-    """Turma/horário da Catequese Infantil, gerenciável pela coordenação.
+class TurmaBase(models.Model):
+    """Campos e regras comuns às turmas/horários gerenciáveis pela coordenação.
 
     Substitui as escolhas fixas que antes viviam em código (comentar/descomentar
     uma tupla para "desativar" um horário). Ativar, desativar, criar uma turma
     nova ou definir o limite de vagas passa a ser um cadastro, não um deploy.
+
+    Cada subclasse concreta deve ser referenciada por uma ForeignKey com
+    related_name="inscritos", usado no cálculo das vagas.
     """
 
     nome = models.CharField(max_length=150)
@@ -30,6 +33,7 @@ class TurmaCatequeseInfantil(models.Model):
     criado_em = models.DateTimeField(default=timezone.now)
 
     class Meta:
+        abstract = True
         ordering = ["ordem", "nome"]
 
     def __str__(self):
@@ -48,6 +52,14 @@ class TurmaCatequeseInfantil(models.Model):
     @property
     def lotada(self):
         return self.vagas_maximas is not None and self.vagas_ocupadas >= self.vagas_maximas
+
+
+class TurmaCatequeseInfantil(TurmaBase):
+    """Turma/horário da Catequese Infantil."""
+
+
+class TurmaCrisma(TurmaBase):
+    """Turma/horário da Crisma."""
 
 
 class CatequeseInfantilModel(models.Model):
@@ -115,11 +127,6 @@ class CrismaModel(models.Model):
         ("M", "Masculino"),
         ("F", "Feminino"),
     )
-    HORARIO_CRISMA = (
-        ("1", "Quinta às 19:30h"),
-        ("2", "Sábado às 09h"),
-        ("3", "Sábado às 10:30h"),
-    )
     
     nome = models.CharField(max_length=150)
     sexo = models.CharField(max_length=1, choices=SEXO_CHOICES)
@@ -148,7 +155,9 @@ class CrismaModel(models.Model):
     primeira_eucaristia_paroquia = models.CharField(max_length=150, blank=True, null=True)
     primeira_eucaristia_celebrante = models.CharField(max_length=150, blank=True, null=True)
    
-    horario = models.CharField(max_length=2, choices=HORARIO_CRISMA)
+    turma = models.ForeignKey(
+        TurmaCrisma, on_delete=models.PROTECT, related_name="inscritos",
+    )
 
     padrinho_nome = models.CharField(max_length=150, blank=True, null=True, default='')    
     padrinho_celular = models.CharField(max_length=20, blank=True, null=True, default='')

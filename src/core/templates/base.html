@@ -517,8 +517,11 @@
             {% if user.is_authenticated and user.is_staff %}
             <hr>
             <div class="gc-menu-secao">Coordenação</div>
-            <a class="gc-menu-item {% if rota == 'dashboard_turmas' or rota == 'criar_turma' or rota == 'editar_turma' %}ativo{% endif %}" href="{% url 'core:dashboard_turmas' %}">
-                <span class="material-symbols-outlined">school</span> Turmas
+            <a class="gc-menu-item {% if rota == 'dashboard_turmas_catequese' or rota == 'criar_turma_catequese' or rota == 'editar_turma_catequese' %}ativo{% endif %}" href="{% url 'core:dashboard_turmas_catequese' %}">
+                <span class="material-symbols-outlined">school</span> Turmas Catequese
+            </a>
+            <a class="gc-menu-item {% if rota == 'dashboard_turmas_crisma' or rota == 'criar_turma_crisma' or rota == 'editar_turma_crisma' %}ativo{% endif %}" href="{% url 'core:dashboard_turmas_crisma' %}">
+                <span class="material-symbols-outlined">local_fire_department</span> Turmas Crisma
             </a>
             <hr>
             <form method="POST" action="{% url 'core:coordenacao_logout' %}">

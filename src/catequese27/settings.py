@@ -17,7 +17,7 @@ DEBUG = env('DEBUG')            # já converte para bool
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])  # converte 'a,b' -> ['a','b']
 
 LOGIN_URL = 'admin:login'
-LOGIN_REDIRECT_URL = 'core:dashboard_turmas'
+LOGIN_REDIRECT_URL = 'core:dashboard_turmas_catequese'
 
 
 

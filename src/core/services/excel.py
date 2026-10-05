@@ -150,7 +150,7 @@ def gerar_Workbook():
             registro.primeira_eucaristia_paroquia,
             registro.primeira_eucaristia_celebrante,
 
-            registro.get_horario_display(),
+            registro.turma.nome,
             registro.padrinho_nome,
             registro.padrinho_celular,
 

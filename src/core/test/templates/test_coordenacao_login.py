@@ -32,11 +32,11 @@ class CoordenacaoLoginPostTest(TestCase):
 
     def test_staff_faz_login_e_vai_para_dashboard(self):
         resp = self.client.post(self.url, {'username': 'coordenadora', 'password': 'senha12345'})
-        self.assertRedirects(resp, r('core:dashboard_turmas'))
+        self.assertRedirects(resp, r('core:dashboard_turmas_catequese'))
         self.assertIn(SESSION_KEY, self.client.session)
 
     def test_login_respeita_parametro_next(self):
-        destino = r('core:criar_turma')
+        destino = r('core:criar_turma_catequese')
         resp = self.client.post(self.url, {
             'username': 'coordenadora', 'password': 'senha12345', 'next': destino,
         })
@@ -46,7 +46,7 @@ class CoordenacaoLoginPostTest(TestCase):
         resp = self.client.post(self.url, {
             'username': 'coordenadora', 'password': 'senha12345', 'next': 'https://site-malicioso.com/',
         })
-        self.assertRedirects(resp, r('core:dashboard_turmas'))
+        self.assertRedirects(resp, r('core:dashboard_turmas_catequese'))
 
     def test_senha_errada_nao_loga(self):
         resp = self.client.post(self.url, {'username': 'coordenadora', 'password': 'errada'})
@@ -75,7 +75,7 @@ class CoordenacaoLoginJaAutenticadoTest(TestCase):
         User.objects.create_user(username='coordenadora', password='senha12345', is_staff=True)
         self.client.login(username='coordenadora', password='senha12345')
         resp = self.client.get(r('core:coordenacao'))
-        self.assertRedirects(resp, r('core:dashboard_turmas'))
+        self.assertRedirects(resp, r('core:dashboard_turmas_catequese'))
 
     def test_nao_staff_logado_ve_formulario_sem_loop(self):
         User.objects.create_user(username='comum', password='senha12345')
@@ -104,7 +104,7 @@ class CoordenacaoLogoutTest(TestCase):
 
     def test_apos_logout_dashboard_exige_login(self):
         self.client.post(self.url)
-        resp = self.client.get(r('core:dashboard_turmas'))
+        resp = self.client.get(r('core:dashboard_turmas_catequese'))
         self.assertEqual(resp.status_code, HTTPStatus.FOUND)
         self.assertTrue(resp.url.startswith(r('core:coordenacao')))
 
@@ -116,7 +116,7 @@ class DashboardAreaUsuarioTest(TestCase):
         self.client = Client()
         User.objects.create_user(username='coordenadora', password='senha12345', is_staff=True)
         self.client.login(username='coordenadora', password='senha12345')
-        self.resp = self.client.get(r('core:dashboard_turmas'))
+        self.resp = self.client.get(r('core:dashboard_turmas_catequese'))
 
     def test_mostra_usuario_logado(self):
         self.assertContains(self.resp, 'Conectado como <strong>coordenadora</strong>', html=False)
@@ -126,8 +126,8 @@ class DashboardAreaUsuarioTest(TestCase):
 
     def test_anonimo_redirecionado_com_next(self):
         client = Client()
-        resp = client.get(r('core:dashboard_turmas'))
+        resp = client.get(r('core:dashboard_turmas_catequese'))
         self.assertRedirects(
-            resp, f"{r('core:coordenacao')}?next={r('core:dashboard_turmas')}",
+            resp, f"{r('core:coordenacao')}?next={r('core:dashboard_turmas_catequese')}",
             fetch_redirect_response=False,
         )

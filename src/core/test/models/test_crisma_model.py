@@ -1,10 +1,11 @@
 from django.test import TestCase
 from datetime import date
-from core.models import CrismaModel
+from core.models import CrismaModel, TurmaCrisma
 
 
 class CrismaModelTest(TestCase):
     def setUp(self):
+        self.turma = TurmaCrisma.objects.create(nome="Quinta às 19:30h")
         self.registro = CrismaModel.objects.create(
             nome="Maria de Lourdes",
             sexo="F",
@@ -33,7 +34,7 @@ class CrismaModelTest(TestCase):
             primeira_eucaristia_paroquia="Paróquia Santo Antônio",
             primeira_eucaristia_celebrante="Pe. Marcos",
 
-            horario="1",
+            turma=self.turma,
 
             padrinho_nome="Carlos Henrique",
             padrinho_celular="19955553333",
@@ -130,10 +131,13 @@ class CrismaModelTest(TestCase):
         self.assertEqual(self.registro.primeira_eucaristia_celebrante, "Pe. Marcos")
 
     # -----------------------------
-    # HORÁRIO
+    # TURMA
     # -----------------------------
-    def test_horario(self):
-        self.assertEqual(self.registro.horario, "1")
+    def test_turma(self):
+        self.assertEqual(self.registro.turma, self.turma)
+
+    def test_turma_lista_inscritos(self):
+        self.assertIn(self.registro, self.turma.inscritos.all())
 
     # -----------------------------
     # PADRINHO
@@ -155,6 +159,6 @@ class CrismaModelTest(TestCase):
             endereco="Rua A",
             cidade="Araras",
             uf="SP",
-            horario="1",
+            turma=self.turma,
         )
         self.assertFalse(novo.ficha_impressa)

@@ -2,10 +2,57 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.forms import AuthenticationForm
 from datetime import date
-from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil
+from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil, TurmaCrisma
 
 
-class CatequeseInfantilForm(ModelForm):
+class TurmaFormMixin:
+    """Regras do campo ``turma`` comuns aos formulários com turmas gerenciáveis.
+
+    A subclasse define ``turma_model`` (modelo da turma) e
+    ``mensagem_turma_obrigatoria``.
+    """
+
+    turma_model = None
+    mensagem_turma_obrigatoria = "Selecione um horário."
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        qs = self.turma_model.objects.filter(ativa=True)
+        # Ao editar uma ficha já existente, mantém a turma atual selecionável
+        # mesmo que tenha sido desativada nesse meio tempo.
+        if self.instance.pk and self.instance.turma_id:
+            qs = qs | self.turma_model.objects.filter(pk=self.instance.turma_id)
+        self.fields['turma'].queryset = qs.distinct()
+
+    def clean_turma(self):
+        turma = self.cleaned_data.get('turma')
+        if not turma:
+            raise forms.ValidationError(self.mensagem_turma_obrigatoria)
+
+        # A turma aceita nascidos entre idade_maxima (mais antiga) e idade_minima (mais recente)
+        data_nascimento = self.cleaned_data.get('data_nascimento')
+        if data_nascimento:
+            if turma.idade_maxima is not None and data_nascimento < turma.idade_maxima:
+                raise forms.ValidationError(
+                    f"A turma \"{turma.nome}\" aceita somente nascidos a partir de {turma.idade_maxima:%d/%m/%Y}."
+                )
+            if turma.idade_minima is not None and data_nascimento > turma.idade_minima:
+                raise forms.ValidationError(
+                    f"A turma \"{turma.nome}\" aceita somente nascidos até {turma.idade_minima:%d/%m/%Y}."
+                )
+
+        # Ficha em edição não deve contar a própria inscrição contra o limite da turma.
+        ja_inscrito = self.instance.pk and self.instance.turma_id == turma.pk
+        if not ja_inscrito and turma.lotada:
+            raise forms.ValidationError(f"Turma \"{turma.nome}\" está lotada.")
+
+        return turma
+
+
+class CatequeseInfantilForm(TurmaFormMixin, ModelForm):
+    turma_model = TurmaCatequeseInfantil
+    mensagem_turma_obrigatoria = "Selecione um horário para a catequese."
+
     class Meta:
         model = CatequeseInfantilModel
         fields = '__all__'
@@ -116,15 +163,6 @@ class CatequeseInfantilForm(ModelForm):
             'cpf_responsavel': {'required': 'Informe o CPF do responsável.'},
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        qs = TurmaCatequeseInfantil.objects.filter(ativa=True)
-        # Ao editar uma ficha já existente, mantém a turma atual selecionável
-        # mesmo que tenha sido desativada nesse meio tempo.
-        if self.instance.pk and self.instance.turma_id:
-            qs = qs | TurmaCatequeseInfantil.objects.filter(pk=self.instance.turma_id)
-        self.fields['turma'].queryset = qs.distinct()
-
     def clean_nome(self):
         nome = self.cleaned_data.get('nome', '').strip()
         if len(nome.split()) < 2:
@@ -155,30 +193,6 @@ class CatequeseInfantilForm(ModelForm):
             raise forms.ValidationError("Informe a data de nascimento.")
         return data_nascimento
 
-    def clean_turma(self):
-        turma = self.cleaned_data.get('turma')
-        if not turma:
-            raise forms.ValidationError("Selecione um horário para a catequese.")
-
-        # A turma aceita nascidos entre idade_maxima (mais antiga) e idade_minima (mais recente)
-        data_nascimento = self.cleaned_data.get('data_nascimento')
-        if data_nascimento:
-            if turma.idade_maxima is not None and data_nascimento < turma.idade_maxima:
-                raise forms.ValidationError(
-                    f"A turma \"{turma.nome}\" aceita somente nascidos a partir de {turma.idade_maxima:%d/%m/%Y}."
-                )
-            if turma.idade_minima is not None and data_nascimento > turma.idade_minima:
-                raise forms.ValidationError(
-                    f"A turma \"{turma.nome}\" aceita somente nascidos até {turma.idade_minima:%d/%m/%Y}."
-                )
-
-        # Ficha em edição não deve contar a própria inscrição contra o limite da turma.
-        ja_inscrito = self.instance.pk and self.instance.turma_id == turma.pk
-        if not ja_inscrito and turma.lotada:
-            raise forms.ValidationError(f"Turma \"{turma.nome}\" está lotada.")
-
-        return turma
-
     def clean(self):
         cleaned_data = super().clean()
         batizado = cleaned_data.get('batizado')
@@ -201,7 +215,10 @@ class CatequeseInfantilForm(ModelForm):
         return cleaned_data
 
 
-class CrismaForm(ModelForm):
+class CrismaForm(TurmaFormMixin, ModelForm):
+    turma_model = TurmaCrisma
+    mensagem_turma_obrigatoria = "Selecione um horário para a Crisma."
+
     class Meta:
         model = CrismaModel
         fields = '__all__'
@@ -238,7 +255,7 @@ class CrismaForm(ModelForm):
             'primeira_eucaristia_paroquia': 'Paróquia:',
             'primeira_eucaristia_celebrante': 'Celebrante:',
 
-            'horario': 'Horário da Crisma:',
+            'turma': 'Horário da Crisma:',
 
             'possui_deficiencia': 'Possui Deficiência?',
             'descricao_deficiencia': 'Descrição da Deficiência:',
@@ -296,7 +313,7 @@ class CrismaForm(ModelForm):
             'primeira_eucaristia_paroquia': forms.TextInput(attrs={'class': 'form-control'}),
             'primeira_eucaristia_celebrante': forms.TextInput(attrs={'class': 'form-control'}),
 
-            'horario': forms.Select(attrs={'class': 'form-select'}),
+            'turma': forms.Select(attrs={'class': 'form-select'}),
 
             'padrinho_nome': forms.TextInput(attrs={'class': 'form-control'}),
             'padrinho_celular': forms.TextInput(attrs={'class': 'form-control'}),
@@ -877,6 +894,18 @@ class TurmaForm(ModelForm):
             )
         return cleaned_data
 
+
+
+class TurmaCrismaForm(TurmaForm):
+    class Meta(TurmaForm.Meta):
+        model = TurmaCrisma
+        widgets = {
+            **TurmaForm.Meta.widgets,
+            'nome': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: Quinta às 19:30h',
+            }),
+        }
 
 class CoordenacaoLoginForm(AuthenticationForm):
     """Login da coordenação: somente usuários staff podem entrar."""

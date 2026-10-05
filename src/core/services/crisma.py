@@ -98,7 +98,7 @@ def gerar_ficha_crisma_menor(ficha):
     c.setFont("Helvetica", 11)
     c.drawString(50, height - 440, f"Horário:")
     c.setFillColor(colors.blue)
-    c.drawString(150, height - 440, f"{ficha.get_horario_display()} ")
+    c.drawString(150, height - 440, f"{ficha.turma.nome} ")
     c.setFillColor(colors.black)
     
     style = estilo_paragrafo()
@@ -306,7 +306,7 @@ def gerar_ficha_crisma_maior(ficha):
     c.setFont("Helvetica", 11)
     c.drawString(50, height - 440, f"Horário:")
     c.setFillColor(colors.blue)
-    c.drawString(150, height - 440, f"{ficha.get_horario_display()} ")
+    c.drawString(150, height - 440, f"{ficha.turma.nome} ")
     c.setFillColor(colors.black)
     
     style = estilo_paragrafo()
