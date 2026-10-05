@@ -22,12 +22,14 @@ class CatequeseInfantilGetTest(TestCase):
 class CatequeseInfantilPostSuccessTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.turma = Turma.objects.create(nome="Pré-Catequese - Terça às 19:30h", idade_minima=6, idade_maxima=8)
-        ano_nascimento = date.today().year - 7  # 7 anos
+        self.turma = Turma.objects.create(
+            nome="Pré-Catequese - Terça às 19:30h",
+            idade_maxima=date(2018, 1, 1), idade_minima=date(2020, 12, 31),
+        )
         self.valid_data = {
     'nome': 'João da Silva',
     'sexo': 'M',                       # 'M' ou 'F'
-    'data_nascimento': f'{ano_nascimento}-10-20',
+    'data_nascimento': '2019-10-20',   # dentro da faixa da turma
     'naturalidade': 'Araras',
 
     'nome_pai': 'Carlos da Silva',

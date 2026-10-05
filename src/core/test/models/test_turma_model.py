@@ -8,13 +8,23 @@ class TurmaModelTest(TestCase):
     def setUp(self):
         self.turma = Turma.objects.create(
             nome="1a Etapa - Quarta às 19:30h",
-            idade_minima=9,
-            idade_maxima=11,
+            idade_maxima=date(2015, 1, 1),
+            idade_minima=date(2017, 12, 31),
             vagas_maximas=2,
         )
 
     def test_created(self):
         self.assertTrue(Turma.objects.exists())
+
+    def test_faixa_de_nascimento_e_date(self):
+        self.turma.refresh_from_db()
+        self.assertEqual(self.turma.idade_maxima, date(2015, 1, 1))
+        self.assertEqual(self.turma.idade_minima, date(2017, 12, 31))
+
+    def test_faixa_de_nascimento_opcional(self):
+        turma_livre = Turma.objects.create(nome="Transferência")
+        self.assertIsNone(turma_livre.idade_minima)
+        self.assertIsNone(turma_livre.idade_maxima)
 
     def test_str_model(self):
         self.assertEqual(str(self.turma), "1a Etapa - Quarta às 19:30h")

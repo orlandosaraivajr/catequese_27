@@ -2,17 +2,20 @@ import datetime
 from django.test import TestCase
 from core.models import CatequeseInfantilModel, Turma
 from core.forms import CatequeseInfantilForm
-from django.utils import timezone
 
 
 class CatequeseInfantilFormTurmaTests(TestCase):
 
     def setUp(self):
+        # Pré-Catequese: nascidos entre 01/01/2018 e 31/12/2020
         self.turma_pre = Turma.objects.create(
-            nome="Pré-Catequese - Terça às 19:30h", idade_minima=6, idade_maxima=8,
+            nome="Pré-Catequese - Terça às 19:30h",
+            idade_maxima=datetime.date(2018, 1, 1), idade_minima=datetime.date(2020, 12, 31),
         )
+        # 1a Etapa: nascidos entre 01/01/2015 e 31/12/2017
         self.turma_1a_etapa = Turma.objects.create(
-            nome="1a Etapa - Quarta às 19:30h", idade_minima=9, idade_maxima=11,
+            nome="1a Etapa - Quarta às 19:30h",
+            idade_maxima=datetime.date(2015, 1, 1), idade_minima=datetime.date(2017, 12, 31),
         )
         self.turma_sem_restricao = Turma.objects.create(nome="Transferência")
         self.turma_inativa = Turma.objects.create(nome="Turma Encerrada", ativa=False)
@@ -55,39 +58,61 @@ class CatequeseInfantilFormTurmaTests(TestCase):
         data.update(kwargs)
         return CatequeseInfantilForm(data=data)
 
-    def idade_para_data_nascimento(self, idade):
-        ano_base = timezone.now().year
-        return datetime.date(ano_base - idade, 1, 1)
-
     # ------------------------------------------------
-    # Turma dentro da faixa etária configurada
+    # Turma dentro da faixa de nascimento configurada
     # ------------------------------------------------
-    def test_turma_dentro_da_faixa_etaria_valido(self):
+    def test_turma_dentro_da_faixa_valido(self):
         form = self.make_form(
-            data_nascimento=self.idade_para_data_nascimento(7),
+            data_nascimento=datetime.date(2019, 5, 10),
             turma=self.turma_pre.id,
         )
         self.assertTrue(form.is_valid())
 
-    def test_turma_abaixo_da_idade_minima_invalido(self):
+    def test_nascido_no_primeiro_dia_da_faixa_valido(self):
         form = self.make_form(
-            data_nascimento=self.idade_para_data_nascimento(7),
+            data_nascimento=datetime.date(2018, 1, 1),
+            turma=self.turma_pre.id,
+        )
+        self.assertTrue(form.is_valid())
+
+    def test_nascido_no_ultimo_dia_da_faixa_valido(self):
+        form = self.make_form(
+            data_nascimento=datetime.date(2020, 12, 31),
+            turma=self.turma_pre.id,
+        )
+        self.assertTrue(form.is_valid())
+
+    def test_nascido_depois_da_idade_minima_invalido(self):
+        """Criança mais nova do que a turma aceita."""
+        form = self.make_form(
+            data_nascimento=datetime.date(2018, 1, 1),
             turma=self.turma_1a_etapa.id,
         )
         self.assertFalse(form.is_valid())
-        self.assertIn("idade mínima", form.errors.get("turma")[0])
+        self.assertIn("nascidos até 31/12/2017", form.errors.get("turma")[0])
 
-    def test_turma_acima_da_idade_maxima_invalido(self):
+    def test_nascido_antes_da_idade_maxima_invalido(self):
+        """Criança mais velha do que a turma aceita."""
         form = self.make_form(
-            data_nascimento=self.idade_para_data_nascimento(12),
+            data_nascimento=datetime.date(2017, 12, 31),
             turma=self.turma_pre.id,
         )
         self.assertFalse(form.is_valid())
-        self.assertIn("aceita até", form.errors.get("turma")[0])
+        self.assertIn("nascidos a partir de 01/01/2018", form.errors.get("turma")[0])
+
+    def test_turma_so_com_idade_maxima(self):
+        turma = Turma.objects.create(nome="Só data inicial", idade_maxima=datetime.date(2015, 1, 1))
+        self.assertTrue(self.make_form(data_nascimento=datetime.date(2022, 1, 1), turma=turma.id).is_valid())
+        self.assertFalse(self.make_form(data_nascimento=datetime.date(2014, 12, 31), turma=turma.id).is_valid())
+
+    def test_turma_so_com_idade_minima(self):
+        turma = Turma.objects.create(nome="Só data final", idade_minima=datetime.date(2017, 12, 31))
+        self.assertTrue(self.make_form(data_nascimento=datetime.date(2010, 1, 1), turma=turma.id).is_valid())
+        self.assertFalse(self.make_form(data_nascimento=datetime.date(2018, 1, 1), turma=turma.id).is_valid())
 
     def test_turma_sem_restricao_aceita_qualquer_idade(self):
         form = self.make_form(
-            data_nascimento=self.idade_para_data_nascimento(16),
+            data_nascimento=datetime.date(2010, 1, 1),
             turma=self.turma_sem_restricao.id,
         )
         self.assertTrue(form.is_valid())
@@ -107,7 +132,7 @@ class CatequeseInfantilFormTurmaTests(TestCase):
 
     def test_turma_inativa_nao_pode_ser_selecionada(self):
         form = self.make_form(
-            data_nascimento=self.idade_para_data_nascimento(10),
+            data_nascimento=datetime.date(2016, 1, 1),
             turma=self.turma_inativa.id,
         )
         self.assertFalse(form.is_valid())
@@ -117,13 +142,13 @@ class CatequeseInfantilFormLimiteVagasTests(TestCase):
 
     def setUp(self):
         self.turma = Turma.objects.create(
-            nome="1a Etapa - Quarta às 19:30h", idade_minima=9, idade_maxima=11, vagas_maximas=20,
+            nome="1a Etapa - Quarta às 19:30h", vagas_maximas=20,
+            idade_maxima=datetime.date(2015, 1, 1), idade_minima=datetime.date(2017, 12, 31),
         )
-        ano_nascimento = timezone.now().year - 10  # 10 anos, dentro da faixa 9-11 da turma
         self.base_data = {
             'nome': 'Maria Silva',
             'sexo': 'F',
-            'data_nascimento': datetime.date(ano_nascimento, 5, 10),
+            'data_nascimento': datetime.date(2016, 5, 10),  # dentro da faixa da turma
             'naturalidade': 'São Paulo',
 
             'nome_pai': 'João da Silva',

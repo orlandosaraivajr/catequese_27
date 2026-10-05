@@ -1,3 +1,4 @@
+from datetime import date
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 from django.shortcuts import resolve_url as r
@@ -39,11 +40,15 @@ class DashboardTurmasListagemTest(TestCase):
         self.client = Client()
         User.objects.create_user(username='coordenacao', password='senha12345', is_staff=True)
         self.client.login(username='coordenacao', password='senha12345')
-        self.turma = Turma.objects.create(nome="1a Etapa - Quarta às 19:30h", idade_minima=9, idade_maxima=11)
+        self.turma = Turma.objects.create(nome="1a Etapa - Quarta às 19:30h", idade_maxima=date(2015, 1, 1), idade_minima=date(2017, 12, 31))
 
     def test_lista_turma_cadastrada(self):
         resp = self.client.get(r('core:dashboard_turmas'))
         self.assertContains(resp, "1a Etapa - Quarta às 19:30h")
+
+    def test_exibe_faixa_de_nascimento(self):
+        resp = self.client.get(r('core:dashboard_turmas'))
+        self.assertContains(resp, "01/01/2015 a 31/12/2017")
 
 
 class CriarTurmaTest(TestCase):

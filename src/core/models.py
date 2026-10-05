@@ -16,13 +16,15 @@ class Turma(models.Model):
         blank=True, null=True,
         help_text="Deixe em branco para não limitar o número de inscritos.",
     )
-    idade_minima = models.PositiveIntegerField(
+    # A turma aceita nascidos entre idade_maxima (data mais antiga, alunos mais velhos)
+    # e idade_minima (data mais recente, alunos mais novos), inclusive.
+    idade_minima = models.DateField(
         blank=True, null=True,
-        help_text="Idade projetada mínima para o ano da catequese. Deixe em branco para não restringir.",
+        help_text="Data de nascimento mais recente aceita (alunos mais novos). Deixe em branco para não restringir.",
     )
-    idade_maxima = models.PositiveIntegerField(
+    idade_maxima = models.DateField(
         blank=True, null=True,
-        help_text="Idade projetada máxima para o ano da catequese. Deixe em branco para não restringir.",
+        help_text="Data de nascimento mais antiga aceita (alunos mais velhos). Deixe em branco para não restringir.",
     )
     ordem = models.PositiveIntegerField(default=0)
     criado_em = models.DateTimeField(default=timezone.now)
