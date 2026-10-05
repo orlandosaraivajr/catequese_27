@@ -2,3 +2,4 @@ Django
 reportlab
 django-environ
 openpyxl
+django-extensions
