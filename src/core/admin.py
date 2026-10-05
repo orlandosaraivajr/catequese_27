@@ -5,7 +5,7 @@ from core.models import CrismaModel
 from core.models import Perseveranca_MEJ_Model
 from core.models import NoivoModel
 from core.models import CoroinhaModel
-from core.models import Turma
+from core.models import TurmaCatequeseInfantil
 
 
 class TurmaAdmin(admin.ModelAdmin):
@@ -48,7 +48,7 @@ class CoroinhaAdmin(admin.ModelAdmin):
     date_hierarchy = 'criado_em'
     search_fields = ('nome','data_nascimento','criado_em')
         
-admin.site.register(Turma, TurmaAdmin)
+admin.site.register(TurmaCatequeseInfantil, TurmaAdmin)
 admin.site.register(CatequeseInfantilModel, CatequeseInfantilAdmin)
 admin.site.register(CatequeseAdultoModel, CatequeseAdultoAdmin)
 admin.site.register(CrismaModel, CrismaAdmin)

@@ -1,12 +1,12 @@
 from datetime import date
 
 from django.test import TestCase
-from core.models import CatequeseInfantilModel, Turma
+from core.models import CatequeseInfantilModel, TurmaCatequeseInfantil
 
 
-class TurmaModelTest(TestCase):
+class TurmaCatequeseInfantilModelTest(TestCase):
     def setUp(self):
-        self.turma = Turma.objects.create(
+        self.turma = TurmaCatequeseInfantil.objects.create(
             nome="1a Etapa - Quarta às 19:30h",
             idade_maxima=date(2015, 1, 1),
             idade_minima=date(2017, 12, 31),
@@ -14,7 +14,7 @@ class TurmaModelTest(TestCase):
         )
 
     def test_created(self):
-        self.assertTrue(Turma.objects.exists())
+        self.assertTrue(TurmaCatequeseInfantil.objects.exists())
 
     def test_faixa_de_nascimento_e_date(self):
         self.turma.refresh_from_db()
@@ -22,7 +22,7 @@ class TurmaModelTest(TestCase):
         self.assertEqual(self.turma.idade_minima, date(2017, 12, 31))
 
     def test_faixa_de_nascimento_opcional(self):
-        turma_livre = Turma.objects.create(nome="Transferência")
+        turma_livre = TurmaCatequeseInfantil.objects.create(nome="Transferência")
         self.assertIsNone(turma_livre.idade_minima)
         self.assertIsNone(turma_livre.idade_maxima)
 
@@ -39,7 +39,7 @@ class TurmaModelTest(TestCase):
         self.assertEqual(self.turma.vagas_ocupadas, 0)
 
     def test_vagas_disponiveis_sem_limite(self):
-        turma_livre = Turma.objects.create(nome="Transferência")
+        turma_livre = TurmaCatequeseInfantil.objects.create(nome="Transferência")
         self.assertIsNone(turma_livre.vagas_disponiveis)
 
     def test_lotada_false_quando_ha_vaga(self):

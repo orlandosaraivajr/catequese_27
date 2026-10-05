@@ -7,12 +7,12 @@ from datetime import date
 import os
 import tempfile
 
-from core.models import CatequeseInfantilModel, Turma
+from core.models import CatequeseInfantilModel, TurmaCatequeseInfantil
 
 
 # Helper para criar ficha válida
 def criar_ficha():
-    turma = Turma.objects.create(nome="1a Etapa - Quarta às 19:30h", idade_maxima=date(2015, 1, 1), idade_minima=date(2017, 12, 31))
+    turma = TurmaCatequeseInfantil.objects.create(nome="1a Etapa - Quarta às 19:30h", idade_maxima=date(2015, 1, 1), idade_minima=date(2017, 12, 31))
     return CatequeseInfantilModel.objects.create(
         nome='Ana',
         sexo='F',

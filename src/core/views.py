@@ -9,7 +9,7 @@ from django.utils.timezone import localtime
 from django.http import HttpResponse, FileResponse
 from django.db.models import Count
 from .forms import CatequeseInfantilForm, CrismaForm, PerseverancaMejForm, CatequeseAdultoForm, NoivoForm, CoroinhaForm, TurmaForm, CoordenacaoLoginForm
-from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, Turma
+from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil
 from .services import gerar_ficha_catequese, gerar_ficha_crisma, gerar_ficha_perseveranca_mej
 from .services import gerar_ficha_catequese_adulto, gerar_ficha_noivos ,  gerar_Workbook, gerar_ficha_coroinhas
 
@@ -376,7 +376,7 @@ def coordenacao_logout(request):
 
 @coordenacao_required
 def dashboard_turmas(request):
-    turmas = Turma.objects.all()
+    turmas = TurmaCatequeseInfantil.objects.all()
     return render(request, 'dashboard_turmas.html', {'turmas': turmas})
 
 
@@ -395,7 +395,7 @@ def criar_turma(request):
 
 @coordenacao_required
 def editar_turma(request, turma_id):
-    turma = get_object_or_404(Turma, id=turma_id)
+    turma = get_object_or_404(TurmaCatequeseInfantil, id=turma_id)
     if request.method == 'POST':
         form = TurmaForm(request.POST, instance=turma)
         if form.is_valid():
@@ -410,7 +410,7 @@ def editar_turma(request, turma_id):
 @coordenacao_required
 def alternar_turma_ativa(request, turma_id):
     if request.method == 'POST':
-        turma = get_object_or_404(Turma, id=turma_id)
+        turma = get_object_or_404(TurmaCatequeseInfantil, id=turma_id)
         turma.ativa = not turma.ativa
         turma.save()
     return redirect('core:dashboard_turmas')

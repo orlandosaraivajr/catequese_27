@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.shortcuts import resolve_url as r
 from http import HTTPStatus
-from core.models import CatequeseInfantilModel, Turma
+from core.models import CatequeseInfantilModel, TurmaCatequeseInfantil
 from datetime import date
 
 class CatequeseInfantilGetTest(TestCase):
@@ -22,7 +22,7 @@ class CatequeseInfantilGetTest(TestCase):
 class CatequeseInfantilPostSuccessTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.turma = Turma.objects.create(
+        self.turma = TurmaCatequeseInfantil.objects.create(
             nome="Pré-Catequese - Terça às 19:30h",
             idade_maxima=date(2018, 1, 1), idade_minima=date(2020, 12, 31),
         )

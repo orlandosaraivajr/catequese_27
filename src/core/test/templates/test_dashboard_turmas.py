@@ -4,7 +4,7 @@ from django.test import TestCase, Client
 from django.shortcuts import resolve_url as r
 from http import HTTPStatus
 
-from core.models import Turma
+from core.models import TurmaCatequeseInfantil
 
 User = get_user_model()
 
@@ -40,7 +40,7 @@ class DashboardTurmasListagemTest(TestCase):
         self.client = Client()
         User.objects.create_user(username='coordenacao', password='senha12345', is_staff=True)
         self.client.login(username='coordenacao', password='senha12345')
-        self.turma = Turma.objects.create(nome="1a Etapa - Quarta às 19:30h", idade_maxima=date(2015, 1, 1), idade_minima=date(2017, 12, 31))
+        self.turma = TurmaCatequeseInfantil.objects.create(nome="1a Etapa - Quarta às 19:30h", idade_maxima=date(2015, 1, 1), idade_minima=date(2017, 12, 31))
 
     def test_lista_turma_cadastrada(self):
         resp = self.client.get(r('core:dashboard_turmas'))
@@ -72,7 +72,7 @@ class CriarTurmaTest(TestCase):
             'ordem': 0,
         }, follow=True)
         self.assertEqual(resp.status_code, HTTPStatus.OK)
-        self.assertTrue(Turma.objects.filter(nome='Sábado às 09h').exists())
+        self.assertTrue(TurmaCatequeseInfantil.objects.filter(nome='Sábado às 09h').exists())
 
 
 class AlternarTurmaAtivaTest(TestCase):
@@ -80,7 +80,7 @@ class AlternarTurmaAtivaTest(TestCase):
         self.client = Client()
         User.objects.create_user(username='coordenacao', password='senha12345', is_staff=True)
         self.client.login(username='coordenacao', password='senha12345')
-        self.turma = Turma.objects.create(nome="Turma Teste", ativa=True)
+        self.turma = TurmaCatequeseInfantil.objects.create(nome="Turma Teste", ativa=True)
 
     def test_post_desativa_turma_ativa(self):
         self.client.post(r('core:alternar_turma_ativa', self.turma.id))

@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 
 
-class Turma(models.Model):
+class TurmaCatequeseInfantil(models.Model):
     """Turma/horário da Catequese Infantil, gerenciável pela coordenação.
 
     Substitui as escolhas fixas que antes viviam em código (comentar/descomentar
@@ -78,7 +78,7 @@ class CatequeseInfantilModel(models.Model):
     batizado_celebrante = models.CharField(max_length=150, blank=True, null=True)
     
     turma = models.ForeignKey(
-        Turma, on_delete=models.PROTECT, related_name="inscritos",
+        TurmaCatequeseInfantil, on_delete=models.PROTECT, related_name="inscritos",
     )
 
     possui_deficiencia = models.BooleanField(default=False)

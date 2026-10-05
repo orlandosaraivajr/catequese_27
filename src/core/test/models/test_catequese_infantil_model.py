@@ -1,11 +1,11 @@
 from datetime import date
 from django.test import TestCase
-from core.models import CatequeseInfantilModel, Turma
+from core.models import CatequeseInfantilModel, TurmaCatequeseInfantil
 
 
 class CatequeseInfantilModelTest(TestCase):
     def setUp(self):
-        self.turma = Turma.objects.create(nome="1a Etapa - Quarta às 19:30h", idade_maxima=date(2015, 1, 1), idade_minima=date(2017, 12, 31))
+        self.turma = TurmaCatequeseInfantil.objects.create(nome="1a Etapa - Quarta às 19:30h", idade_maxima=date(2015, 1, 1), idade_minima=date(2017, 12, 31))
         self.cadastro = CatequeseInfantilModel.objects.create(
             nome="João da Silva",
             sexo="M",

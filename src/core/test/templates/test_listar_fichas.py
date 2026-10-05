@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.shortcuts import resolve_url as r
 from http import HTTPStatus
-from core.models import CatequeseInfantilModel, Turma
+from core.models import CatequeseInfantilModel, TurmaCatequeseInfantil
 from datetime import date
 
 
@@ -43,7 +43,7 @@ class ListarFichasUmRegistroTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = r('core:listar_fichas')
-        self.turma = Turma.objects.create(nome="1a Etapa - Quarta às 19:30h", idade_maxima=date(2015, 1, 1), idade_minima=date(2017, 12, 31))
+        self.turma = TurmaCatequeseInfantil.objects.create(nome="1a Etapa - Quarta às 19:30h", idade_maxima=date(2015, 1, 1), idade_minima=date(2017, 12, 31))
 
         # Ficha pendente de impressão
         self.f1 = CatequeseInfantilModel.objects.create(
@@ -72,7 +72,7 @@ class ListarFichasDoisRegistrosTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = r('core:listar_fichas')
-        self.turma = Turma.objects.create(nome="1a Etapa - Quarta às 19:30h", idade_maxima=date(2015, 1, 1), idade_minima=date(2017, 12, 31))
+        self.turma = TurmaCatequeseInfantil.objects.create(nome="1a Etapa - Quarta às 19:30h", idade_maxima=date(2015, 1, 1), idade_minima=date(2017, 12, 31))
 
         # Ficha pendente (deve aparecer)
         self.f1 = CatequeseInfantilModel.objects.create(

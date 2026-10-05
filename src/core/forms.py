@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.forms import AuthenticationForm
 from datetime import date
-from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, Turma
+from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil
 
 
 class CatequeseInfantilForm(ModelForm):
@@ -118,11 +118,11 @@ class CatequeseInfantilForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        qs = Turma.objects.filter(ativa=True)
+        qs = TurmaCatequeseInfantil.objects.filter(ativa=True)
         # Ao editar uma ficha já existente, mantém a turma atual selecionável
         # mesmo que tenha sido desativada nesse meio tempo.
         if self.instance.pk and self.instance.turma_id:
-            qs = qs | Turma.objects.filter(pk=self.instance.turma_id)
+            qs = qs | TurmaCatequeseInfantil.objects.filter(pk=self.instance.turma_id)
         self.fields['turma'].queryset = qs.distinct()
 
     def clean_nome(self):
@@ -841,7 +841,7 @@ class CoroinhaForm(ModelForm):
 
 class TurmaForm(ModelForm):
     class Meta:
-        model = Turma
+        model = TurmaCatequeseInfantil
         fields = ['nome', 'ativa', 'vagas_maximas', 'idade_maxima', 'idade_minima', 'ordem']
 
         labels = {

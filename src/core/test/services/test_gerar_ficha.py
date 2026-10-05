@@ -4,7 +4,7 @@ from datetime import date
 
 from django.test import TestCase, override_settings
 
-from core.models import CatequeseInfantilModel, Turma
+from core.models import CatequeseInfantilModel, TurmaCatequeseInfantil
 from core.services import gerar_ficha_catequese
 
 
@@ -16,7 +16,7 @@ class GerarFichaMediaRootTest(TestCase):
         self.addCleanup(tmp_dir.cleanup)
         self.media_root = os.path.join(tmp_dir.name, 'media_inexistente')
 
-        turma = Turma.objects.create(nome="1a Etapa - Quarta às 19:30h")
+        turma = TurmaCatequeseInfantil.objects.create(nome="1a Etapa - Quarta às 19:30h")
         self.ficha = CatequeseInfantilModel.objects.create(
             nome='Ana Souza', sexo='F', data_nascimento=date(2016, 6, 1),
             endereco='Rua das Flores, 123', cidade='Rio Claro', uf='SP', turma=turma,
