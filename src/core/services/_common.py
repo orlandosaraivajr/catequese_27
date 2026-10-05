@@ -30,6 +30,8 @@ def data_hoje():
 
 def novo_canvas(nome_arquivo):
     """Abre um Canvas A4 já salvando dentro de MEDIA_ROOT; devolve (canvas, height, filename)."""
+    # MEDIA_ROOT não é versionado: cria a pasta caso ainda não exista (ex.: clone novo)
+    os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
     filename = os.path.join(settings.MEDIA_ROOT, nome_arquivo)
     c = canvas.Canvas(filename, pagesize=A4)
     width, height = A4
