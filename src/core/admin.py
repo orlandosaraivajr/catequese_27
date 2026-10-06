@@ -7,6 +7,7 @@ from core.models import NoivoModel
 from core.models import CoroinhaModel
 from core.models import TurmaCatequeseInfantil
 from core.models import TurmaCrisma
+from core.models import TurmaCatequeseAdulto
 
 
 class TurmaAdmin(admin.ModelAdmin):
@@ -26,7 +27,8 @@ class CatequeseInfantilAdmin(admin.ModelAdmin):
     search_fields = ('nome','data_nascimento','criado_em')
 
 class CatequeseAdultoAdmin(admin.ModelAdmin):
-    list_display = ('nome','data_nascimento','criado_em')
+    list_display = ('nome','turma','data_nascimento','criado_em')
+    list_filter = ('turma',)
     date_hierarchy = 'criado_em'
     search_fields = ('nome','data_nascimento','criado_em')
 
@@ -52,6 +54,7 @@ class CoroinhaAdmin(admin.ModelAdmin):
         
 admin.site.register(TurmaCatequeseInfantil, TurmaAdmin)
 admin.site.register(TurmaCrisma, TurmaAdmin)
+admin.site.register(TurmaCatequeseAdulto, TurmaAdmin)
 admin.site.register(CatequeseInfantilModel, CatequeseInfantilAdmin)
 admin.site.register(CatequeseAdultoModel, CatequeseAdultoAdmin)
 admin.site.register(CrismaModel, CrismaAdmin)

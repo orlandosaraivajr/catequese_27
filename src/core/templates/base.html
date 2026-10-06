@@ -523,6 +523,9 @@
             <a class="gc-menu-item {% if rota == 'dashboard_turmas_crisma' or rota == 'criar_turma_crisma' or rota == 'editar_turma_crisma' %}ativo{% endif %}" href="{% url 'core:dashboard_turmas_crisma' %}">
                 <span class="material-symbols-outlined">local_fire_department</span> Turmas Crisma
             </a>
+            <a class="gc-menu-item {% if rota == 'dashboard_turmas_catequese_adulto' or rota == 'criar_turma_catequese_adulto' or rota == 'editar_turma_catequese_adulto' %}ativo{% endif %}" href="{% url 'core:dashboard_turmas_catequese_adulto' %}">
+                <span class="material-symbols-outlined">menu_book</span> Turmas Catequese Adulto
+            </a>
             <a class="gc-menu-item" href="{% url 'core:exportar-excel' %}">
                 <span class="material-symbols-outlined">download</span> Relatório
             </a>

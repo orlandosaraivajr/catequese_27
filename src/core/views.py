@@ -6,8 +6,8 @@ from django.contrib import messages
 from django.utils.timezone import localtime
 from django.http import HttpResponse, FileResponse
 from django.db.models import Count
-from .forms import CatequeseInfantilForm, CrismaForm, PerseverancaMejForm, CatequeseAdultoForm, NoivoForm, CoroinhaForm, TurmaForm, TurmaCrismaForm, CoordenacaoLoginForm
-from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil, TurmaCrisma
+from .forms import CatequeseInfantilForm, CrismaForm, PerseverancaMejForm, CatequeseAdultoForm, NoivoForm, CoroinhaForm, TurmaForm, TurmaCrismaForm, TurmaCatequeseAdultoForm, CoordenacaoLoginForm
+from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil, TurmaCrisma, TurmaCatequeseAdulto
 from .services import gerar_ficha_catequese, gerar_ficha_crisma, gerar_ficha_perseveranca_mej
 from .services import gerar_ficha_catequese_adulto, gerar_ficha_noivos ,  gerar_Workbook, gerar_ficha_coroinhas
 
@@ -309,14 +309,13 @@ def total(request):
     # Catequese Adulto
     qs = (
         CatequeseAdultoModel.objects
-        .values('horario')
+        .values('turma__nome')
         .annotate(quantidade=Count('id'))
         .order_by('-quantidade')
     )
-    horarios_dict = dict(CatequeseAdultoModel.HORARIO_CATEQUESE_ADULTO)
     total_catequese_adulto = [
         {
-            "titulo": horarios_dict.get(item["horario"]),
+            "titulo": item["turma__nome"],
             "quantidade": item["quantidade"]
         }
         for item in qs
@@ -370,7 +369,7 @@ def coordenacao_logout(request):
 
 
 # ---------------------------------------------------------------------------
-# Dashboard da coordenação -- turmas da Catequese Infantil e da Crisma
+# Dashboard da coordenação -- turmas da Catequese Infantil, Crisma e Catequese de Adultos
 # ---------------------------------------------------------------------------
 
 # Tudo o que muda entre os dashboards de turmas: modelo, formulário, textos e
@@ -395,6 +394,17 @@ TURMAS_CRISMA = {
     'url_criar': 'core:criar_turma_crisma',
     'url_editar': 'core:editar_turma_crisma',
     'url_alternar': 'core:alternar_turma_crisma_ativa',
+}
+
+TURMAS_CATEQUESE_ADULTO = {
+    'modelo': TurmaCatequeseAdulto,
+    'form': TurmaCatequeseAdultoForm,
+    'titulo': 'Turmas Catequese Adulto',
+    'subtitulo': 'Coordenação · Catequese de Adultos',
+    'url_dashboard': 'core:dashboard_turmas_catequese_adulto',
+    'url_criar': 'core:criar_turma_catequese_adulto',
+    'url_editar': 'core:editar_turma_catequese_adulto',
+    'url_alternar': 'core:alternar_turma_catequese_adulto_ativa',
 }
 
 
@@ -480,3 +490,23 @@ def editar_turma_crisma(request, turma_id):
 @coordenacao_required
 def alternar_turma_crisma_ativa(request, turma_id):
     return _alternar_turma_ativa(request, TURMAS_CRISMA, turma_id)
+
+
+@coordenacao_required
+def dashboard_turmas_catequese_adulto(request):
+    return _dashboard_turmas(request, TURMAS_CATEQUESE_ADULTO)
+
+
+@coordenacao_required
+def criar_turma_catequese_adulto(request):
+    return _criar_turma(request, TURMAS_CATEQUESE_ADULTO)
+
+
+@coordenacao_required
+def editar_turma_catequese_adulto(request, turma_id):
+    return _editar_turma(request, TURMAS_CATEQUESE_ADULTO, turma_id)
+
+
+@coordenacao_required
+def alternar_turma_catequese_adulto_ativa(request, turma_id):
+    return _alternar_turma_ativa(request, TURMAS_CATEQUESE_ADULTO, turma_id)

@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.forms import AuthenticationForm
 from datetime import date
-from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil, TurmaCrisma
+from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil, TurmaCrisma, TurmaCatequeseAdulto
 
 
 class TurmaFormMixin:
@@ -551,7 +551,10 @@ class PerseverancaMejForm(ModelForm):
                 self.add_error('primeira_eucaristia_celebrante', 'Informe o celebrante.')
 
 
-class CatequeseAdultoForm(forms.ModelForm):
+class CatequeseAdultoForm(TurmaFormMixin, forms.ModelForm):
+    turma_model = TurmaCatequeseAdulto
+    mensagem_turma_obrigatoria = "Selecione um horário para a catequese."
+
     class Meta:
         model = CatequeseAdultoModel
         fields = '__all__'
@@ -594,6 +597,8 @@ class CatequeseAdultoForm(forms.ModelForm):
             'casado_igreja_diocese': "Diocese do casamento",
             'casado_igreja_paroquia': "Paróquia do casamento",
             'casado_igreja_celebrante': "Padre celebrante do casamento",
+
+            'turma': 'Horário da Catequese:',
         }
 
         widgets = {
@@ -630,7 +635,7 @@ class CatequeseAdultoForm(forms.ModelForm):
             'casado_igreja_paroquia': forms.TextInput(attrs={'class': 'form-control'}),
             'casado_igreja_celebrante': forms.TextInput(attrs={'class': 'form-control'}),
 
-            'horario': forms.Select(attrs={'class': 'form-select'}),
+            'turma': forms.Select(attrs={'class': 'form-select'}),
 
             'padrinho_nome': forms.TextInput(attrs={'class': 'form-control'}),
             'padrinho_celular': forms.TextInput(attrs={'class': 'form-control'}),
@@ -906,6 +911,19 @@ class TurmaCrismaForm(TurmaForm):
                 'placeholder': 'Ex: Quinta às 19:30h',
             }),
         }
+
+
+class TurmaCatequeseAdultoForm(TurmaForm):
+    class Meta(TurmaForm.Meta):
+        model = TurmaCatequeseAdulto
+        widgets = {
+            **TurmaForm.Meta.widgets,
+            'nome': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: Quinta às 19:30h - SEM Batismo',
+            }),
+        }
+
 
 class CoordenacaoLoginForm(AuthenticationForm):
     """Login da coordenação: somente usuários staff podem entrar."""

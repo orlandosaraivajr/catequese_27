@@ -115,7 +115,7 @@ def gerar_ficha_catequese_adulto(ficha):
 
     c.setFont("Helvetica", 11)
     c.drawString(50, height - 700, f"Horário:")
-    c.drawString(150, height - 700, f"{ficha.get_horario_display()}")
+    c.drawString(150, height - 700, f"{ficha.turma.nome}")
     
    
     style = estilo_paragrafo()

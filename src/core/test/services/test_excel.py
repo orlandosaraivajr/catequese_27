@@ -2,7 +2,7 @@ from datetime import date
 
 from django.test import TestCase
 
-from core.models import CrismaModel, TurmaCrisma
+from core.models import CatequeseAdultoModel, CrismaModel, TurmaCatequeseAdulto, TurmaCrisma
 from core.services.excel import gerar_Workbook
 
 
@@ -22,3 +22,21 @@ class ExcelCrismaTest(TestCase):
         coluna = cabecalho.index('Horário da Crisma')
         linha = [c.value for c in self.ws[2]]
         self.assertEqual(linha[coluna], 'Sábado às 10:30h')
+
+
+class ExcelCatequeseAdultoTest(TestCase):
+    """A planilha da Catequese de Adultos exporta o nome da turma na coluna de horário."""
+
+    def setUp(self):
+        turma = TurmaCatequeseAdulto.objects.create(nome="Quinta às 19:30h - SEM Batismo")
+        CatequeseAdultoModel.objects.create(
+            nome='Ana Souza', sexo='F', data_nascimento=date(1990, 6, 1),
+            endereco='Rua X', cidade='Rio Claro', uf='SP', estado_civil='Solteira', turma=turma,
+        )
+        self.ws = gerar_Workbook()['Catequese Adulto']
+
+    def test_coluna_horario_tem_nome_da_turma(self):
+        cabecalho = [c.value for c in self.ws[1]]
+        coluna = cabecalho.index('Horário da Catequese (Adulto)')
+        linha = [c.value for c in self.ws[2]]
+        self.assertEqual(linha[coluna], 'Quinta às 19:30h - SEM Batismo')

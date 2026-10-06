@@ -385,7 +385,7 @@ def gerar_Workbook():
             registro.casado_igreja_paroquia,
             registro.casado_igreja_celebrante,
 
-            registro.get_horario_display(),
+            registro.turma.nome,
             registro.padrinho_nome,
             registro.padrinho_celular,
 

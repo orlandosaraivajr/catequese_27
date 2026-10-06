@@ -62,6 +62,10 @@ class TurmaCrisma(TurmaBase):
     """Turma/horário da Crisma."""
 
 
+class TurmaCatequeseAdulto(TurmaBase):
+    """Turma/horário da Catequese de Adultos."""
+
+
 class CatequeseInfantilModel(models.Model):
     SEXO_CHOICES = (
         ("M", "Masculino"),
@@ -269,14 +273,6 @@ class CatequeseAdultoModel(models.Model):
         ("M", "Masculino"),
         ("F", "Feminino"),
     )
-    HORARIO_CATEQUESE_ADULTO = (
-#        ("1", "Terça às 19:30h - COM Batismo"),
-#        ("3", "Quarta às 19:30h - COM Batismo"),
-        ("4", "Quinta às 19:30h - SEM Batismo"),
-#        ("2", "Sábado às 08h - COM Batismo"),
-        ("5", "Sábado às 09h - SEM Batismo"),
-    )
-    
     nome = models.CharField(max_length=150)
     cpf = models.CharField(max_length=14,default='')
     sexo = models.CharField(max_length=1, choices=SEXO_CHOICES)
@@ -310,7 +306,9 @@ class CatequeseAdultoModel(models.Model):
     casado_igreja_paroquia = models.CharField(max_length=150, blank=True, null=True)
     casado_igreja_celebrante = models.CharField(max_length=150, blank=True, null=True)
 
-    horario = models.CharField(max_length=2, choices=HORARIO_CATEQUESE_ADULTO)
+    turma = models.ForeignKey(
+        TurmaCatequeseAdulto, on_delete=models.PROTECT, related_name="inscritos",
+    )
 
     padrinho_nome = models.CharField(max_length=150, blank=True, null=True, default='')    
     padrinho_celular = models.CharField(max_length=20, blank=True, null=True, default='')

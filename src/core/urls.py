@@ -57,4 +57,10 @@ urlpatterns = [
     path('coordenacao/turmas_crisma/nova', views.criar_turma_crisma, name='criar_turma_crisma'),
     path('coordenacao/turmas_crisma/<int:turma_id>/editar', views.editar_turma_crisma, name='editar_turma_crisma'),
     path('coordenacao/turmas_crisma/<int:turma_id>/alternar', views.alternar_turma_crisma_ativa, name='alternar_turma_crisma_ativa'),
+
+    # Dashboard da coordenação -- turmas da Catequese de Adultos
+    path('coordenacao/turmas_catequese_adulto', views.dashboard_turmas_catequese_adulto, name='dashboard_turmas_catequese_adulto'),
+    path('coordenacao/turmas_catequese_adulto/nova', views.criar_turma_catequese_adulto, name='criar_turma_catequese_adulto'),
+    path('coordenacao/turmas_catequese_adulto/<int:turma_id>/editar', views.editar_turma_catequese_adulto, name='editar_turma_catequese_adulto'),
+    path('coordenacao/turmas_catequese_adulto/<int:turma_id>/alternar', views.alternar_turma_catequese_adulto_ativa, name='alternar_turma_catequese_adulto_ativa'),
 ]

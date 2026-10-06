@@ -1,10 +1,11 @@
 from django.test import TestCase
-from core.models import CatequeseAdultoModel
+from core.models import CatequeseAdultoModel, TurmaCatequeseAdulto
 
 
 class CatequeseAdultoModelTest(TestCase):
 
     def setUp(self):
+        self.turma = TurmaCatequeseAdulto.objects.create(nome="Quinta às 19:30h - SEM Batismo")
         self.cadastro = CatequeseAdultoModel.objects.create(
             nome="Maria de Lourdes Silva",
             cpf="123.456.789-00",
@@ -39,7 +40,7 @@ class CatequeseAdultoModelTest(TestCase):
             # Casamento na Igreja
             casado_igreja=False,
 
-            horario="1",
+            turma=self.turma,
 
             padrinho_nome="Carlos Mendes",
             padrinho_celular="19977776666",
@@ -129,8 +130,11 @@ class CatequeseAdultoModelTest(TestCase):
         self.assertIsNone(self.cadastro.casado_igreja_data)
 
     # ----------------- HORÁRIO -----------------
-    def test_horario(self):
-        self.assertEqual(self.cadastro.horario, "1")
+    def test_turma(self):
+        self.assertEqual(self.cadastro.turma, self.turma)
+
+    def test_turma_lista_inscritos(self):
+        self.assertIn(self.cadastro, self.turma.inscritos.all())
 
     # ----------------- PADRINHOS -----------------
     def test_padrinho_nome(self):
