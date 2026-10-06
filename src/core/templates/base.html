@@ -523,6 +523,9 @@
             <a class="gc-menu-item {% if rota == 'dashboard_turmas_crisma' or rota == 'criar_turma_crisma' or rota == 'editar_turma_crisma' %}ativo{% endif %}" href="{% url 'core:dashboard_turmas_crisma' %}">
                 <span class="material-symbols-outlined">local_fire_department</span> Turmas Crisma
             </a>
+            <a class="gc-menu-item" href="{% url 'core:exportar-excel' %}">
+                <span class="material-symbols-outlined">download</span> Relatório
+            </a>
             <hr>
             <form method="POST" action="{% url 'core:coordenacao_logout' %}">
                 {% csrf_token %}

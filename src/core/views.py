@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
@@ -11,6 +10,9 @@ from .forms import CatequeseInfantilForm, CrismaForm, PerseverancaMejForm, Cateq
 from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil, TurmaCrisma
 from .services import gerar_ficha_catequese, gerar_ficha_crisma, gerar_ficha_perseveranca_mej
 from .services import gerar_ficha_catequese_adulto, gerar_ficha_noivos ,  gerar_Workbook, gerar_ficha_coroinhas
+
+# Views da coordenação redirecionam para o login próprio, e não para o admin
+coordenacao_required = staff_member_required(login_url='core:coordenacao')
 
 
 def index(request):
@@ -26,7 +28,7 @@ def catequese_infantil(request):
         form = CatequeseInfantilForm()
     return render(request, 'catequese_infantil.html', {'form': form})
 
-@login_required
+@coordenacao_required
 def crisma(request):
     if request.method == 'POST':
         form = CrismaForm(request.POST)
@@ -329,7 +331,7 @@ def total(request):
     }
     return render(request, 'contador_fichas.html', contexto)
 
-@login_required
+@coordenacao_required
 def exportar_excel(request):
     wb = gerar_Workbook()
     response = HttpResponse(
@@ -344,10 +346,6 @@ def exportar_excel(request):
 # ---------------------------------------------------------------------------
 # Login / logout da coordenação
 # ---------------------------------------------------------------------------
-
-# Views da coordenação redirecionam para o login próprio, e não para o admin
-coordenacao_required = staff_member_required(login_url='core:coordenacao')
-
 
 class CoordenacaoLoginView(LoginView):
     template_name = 'coordenacao_login.html'

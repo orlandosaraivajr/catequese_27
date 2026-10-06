@@ -133,6 +133,19 @@ class DashboardAreaUsuarioTest(TestCase):
     def test_mostra_usuario_logado(self):
         self.assertContains(self.resp, 'Conectado como <strong>coordenadora</strong>', html=False)
 
+    def test_menu_tem_link_do_relatorio(self):
+        self.assertContains(self.resp, f'href="{r("core:exportar-excel")}"')
+        self.assertContains(self.resp, 'Relatório')
+
+    def test_link_do_relatorio_baixa_planilha(self):
+        resp = self.client.get(r('core:exportar-excel'))
+        self.assertEqual(resp.status_code, HTTPStatus.OK)
+        self.assertEqual(
+            resp['Content-Type'],
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        self.assertIn('attachment; filename=relatorio_catequese_', resp['Content-Disposition'])
+
     def test_tem_formulario_de_logout(self):
         self.assertContains(self.resp, f'action="{r("core:coordenacao_logout")}"')
 
@@ -143,3 +156,18 @@ class DashboardAreaUsuarioTest(TestCase):
             resp, f"{r('core:coordenacao')}?next={r('core:dashboard_turmas_catequese')}",
             fetch_redirect_response=False,
         )
+
+
+class MenuRelatorioVisibilidadeTest(TestCase):
+    """O link "Relatório" só aparece no menu para a coordenação (staff)."""
+
+    def test_anonimo_nao_ve_link_do_relatorio(self):
+        resp = Client().get(r('core:index'))
+        self.assertNotContains(resp, f'href="{r("core:exportar-excel")}"')
+
+    def test_usuario_comum_nao_ve_link_do_relatorio(self):
+        User.objects.create_user(username='comum', password='senha12345')
+        client = Client()
+        client.login(username='comum', password='senha12345')
+        resp = client.get(r('core:index'))
+        self.assertNotContains(resp, f'href="{r("core:exportar-excel")}"')
