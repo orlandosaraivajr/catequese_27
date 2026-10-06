@@ -411,8 +411,8 @@ TURMAS_CATEQUESE_ADULTO = {
 TURMAS_PERSEVERANCA_MEJ = {
     'modelo': TurmaPerseveranca_MEJ,
     'form': TurmaPerseveranca_MEJForm,
-    'titulo': 'Turmas Perseverança / MEJ',
-    'subtitulo': 'Coordenação · Perseverança / MEJ',
+    'titulo': 'Turmas MEJ',
+    'subtitulo': 'Coordenação · MEJ',
     'url_dashboard': 'core:dashboard_turmas_perseveranca_mej',
     'url_criar': 'core:criar_turma_perseveranca_mej',
     'url_editar': 'core:editar_turma_perseveranca_mej',

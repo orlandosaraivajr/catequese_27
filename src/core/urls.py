@@ -7,7 +7,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('catequese_infantil', views.catequese_infantil, name='catequese_infantil'),
     path('crisma', views.crisma, name='crisma'),
-    path('perseveranca', views.perseveranca_mej, name='perseveranca_mej'),
+    path('mej', views.perseveranca_mej, name='perseveranca_mej'),
     path('catequese_adulto', views.catequese_adulto, name='catequese_adulto'),
     path('procure-secretaria', views.procure_secretaria, name='procure_secretaria'),
     path('noivos', views.noivos, name='noivos'),
@@ -24,10 +24,10 @@ urlpatterns = [
     path('imprimir-ficha-crisma', views.imprimir_ficha_crisma, name='imprimir_ficha_crisma'),
     path('assinar-ficha-crisma', views.assinar_ficha_crisma, name='assinar_ficha_crisma'),
     path('remover-ficha-crisma', views.remover_ficha_crisma, name='remover_ficha_crisma'),
-    # Perseverança
-    path('imprimir-ficha-perseveranca-mej', views.imprimir_ficha_perseveranca_mej, name='imprimir_ficha_perseveranca_mej'),
-    path('assinar-ficha-perseveranca-mej', views.assinar_ficha_perseveranca_mej, name='assinar_ficha_perseveranca_mej'),
-    path('remover-ficha-perseveranca-mej', views.remover_ficha_perseveranca_mej, name='remover_ficha_perseveranca_mej'),
+    # MEJ
+    path('imprimir-ficha-mej', views.imprimir_ficha_perseveranca_mej, name='imprimir_ficha_perseveranca_mej'),
+    path('assinar-ficha-mej', views.assinar_ficha_perseveranca_mej, name='assinar_ficha_perseveranca_mej'),
+    path('remover-ficha-mej', views.remover_ficha_perseveranca_mej, name='remover_ficha_perseveranca_mej'),
     # Catequese Adulto
     path('imprimir-ficha-adulto', views.imprimir_ficha_adulto, name='imprimir_ficha_adulto'),
     path('assinar-ficha-adulto', views.assinar_ficha_adulto, name='assinar_ficha_adulto'),
@@ -64,9 +64,9 @@ urlpatterns = [
     path('coordenacao/turmas_catequese_adulto/<int:turma_id>/editar', views.editar_turma_catequese_adulto, name='editar_turma_catequese_adulto'),
     path('coordenacao/turmas_catequese_adulto/<int:turma_id>/alternar', views.alternar_turma_catequese_adulto_ativa, name='alternar_turma_catequese_adulto_ativa'),
 
-    # Dashboard da coordenação -- turmas da Perseverança / MEJ
-    path('coordenacao/turmas_perseveranca_mej', views.dashboard_turmas_perseveranca_mej, name='dashboard_turmas_perseveranca_mej'),
-    path('coordenacao/turmas_perseveranca_mej/nova', views.criar_turma_perseveranca_mej, name='criar_turma_perseveranca_mej'),
-    path('coordenacao/turmas_perseveranca_mej/<int:turma_id>/editar', views.editar_turma_perseveranca_mej, name='editar_turma_perseveranca_mej'),
-    path('coordenacao/turmas_perseveranca_mej/<int:turma_id>/alternar', views.alternar_turma_perseveranca_mej_ativa, name='alternar_turma_perseveranca_mej_ativa'),
+    # Dashboard da coordenação -- turmas do MEJ
+    path('coordenacao/turmas_mej', views.dashboard_turmas_perseveranca_mej, name='dashboard_turmas_perseveranca_mej'),
+    path('coordenacao/turmas_mej/nova', views.criar_turma_perseveranca_mej, name='criar_turma_perseveranca_mej'),
+    path('coordenacao/turmas_mej/<int:turma_id>/editar', views.editar_turma_perseveranca_mej, name='editar_turma_perseveranca_mej'),
+    path('coordenacao/turmas_mej/<int:turma_id>/alternar', views.alternar_turma_perseveranca_mej_ativa, name='alternar_turma_perseveranca_mej_ativa'),
 ]

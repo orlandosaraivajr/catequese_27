@@ -391,7 +391,7 @@ class CrismaForm(TurmaFormMixin, ModelForm):
 
 class PerseverancaMejForm(TurmaFormMixin, ModelForm):
     turma_model = TurmaPerseveranca_MEJ
-    mensagem_turma_obrigatoria = "Selecione um horário para a Perseverança / MEJ."
+    mensagem_turma_obrigatoria = "Selecione um horário para o MEJ."
 
     class Meta:
         model = Perseveranca_MEJ_Model
@@ -411,7 +411,7 @@ class PerseverancaMejForm(TurmaFormMixin, ModelForm):
             'cidade': 'Cidade:',
             'uf': 'UF:',
 
-            'turma': 'Horário da Perseverança / MEJ:',
+            'turma': 'Horário do MEJ:',
 
             'celular_pai': 'Celular do Pai:',
             'celular_mae': 'Celular da Mãe:',

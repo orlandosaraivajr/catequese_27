@@ -88,7 +88,7 @@ class PerseverancaMejFormTurmaTests(TestCase):
         self.assertIn("turma", form.errors)
 
     def test_label_do_campo_turma(self):
-        self.assertEqual(PerseverancaMejForm().fields['turma'].label, 'Horário da Perseverança / MEJ:')
+        self.assertEqual(PerseverancaMejForm().fields['turma'].label, 'Horário do MEJ:')
 
     def test_turma_inativa_nao_aparece_no_queryset_do_form(self):
         form = PerseverancaMejForm()

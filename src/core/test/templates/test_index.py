@@ -28,7 +28,26 @@ class IndexGetTest(TestCase):
                 self.assertContains(self.resp, f'href="{r(rota)}"')
 
     def test_titulos_das_opcoes(self):
-        for titulo in ('Catequese Infantil', 'Perseverança / MEJ', 'Catequese Adulto',
+        for titulo in ('Catequese Infantil', 'MEJ', 'Catequese Adulto',
                        'Crisma', 'Casamento', 'Coroinhas'):
             with self.subTest(titulo):
                 self.assertContains(self.resp, titulo)
+
+
+class RotasMejTest(TestCase):
+    """As rotas do MEJ usam /mej no caminho (antes /perseveranca)."""
+
+    def test_caminhos(self):
+        esperado = {
+            'core:perseveranca_mej': '/mej',
+            'core:imprimir_ficha_perseveranca_mej': '/imprimir-ficha-mej',
+            'core:assinar_ficha_perseveranca_mej': '/assinar-ficha-mej',
+            'core:remover_ficha_perseveranca_mej': '/remover-ficha-mej',
+            'core:dashboard_turmas_perseveranca_mej': '/coordenacao/turmas_mej',
+        }
+        for rota, caminho in esperado.items():
+            with self.subTest(rota):
+                self.assertEqual(r(rota), caminho)
+
+    def test_caminho_antigo_nao_existe(self):
+        self.assertEqual(self.client.get('/perseveranca').status_code, 404)

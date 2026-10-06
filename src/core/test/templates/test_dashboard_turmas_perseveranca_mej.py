@@ -15,14 +15,14 @@ def login_coordenacao(client):
 
 
 class DashboardTurmasPerseverancaMejAcessoTest(TestCase):
-    """A dashboard de turmas da Perseverança / MEJ é restrita a usuários staff."""
+    """A dashboard de turmas do MEJ é restrita a usuários staff."""
 
     def setUp(self):
         self.client = Client()
         self.url = r('core:dashboard_turmas_perseveranca_mej')
 
     def test_rota(self):
-        self.assertEqual(self.url, '/coordenacao/turmas_perseveranca_mej')
+        self.assertEqual(self.url, '/coordenacao/turmas_mej')
 
     def test_anonimo_e_redirecionado_para_login(self):
         resp = self.client.get(self.url)
@@ -70,8 +70,8 @@ class DashboardTurmasPerseverancaMejListagemTest(TestCase):
         self.assertContains(self.resp, "01/01/2001 a 31/12/2011")
 
     def test_exibe_titulo(self):
-        self.assertContains(self.resp, "Turmas Perseverança / MEJ")
-        self.assertContains(self.resp, "Coordenação · Perseverança / MEJ")
+        self.assertContains(self.resp, "Turmas MEJ")
+        self.assertContains(self.resp, "Coordenação · MEJ")
 
     def test_nao_lista_turmas_da_crisma(self):
         TurmaCrisma.objects.create(nome="Turma exclusiva da Crisma")
@@ -99,7 +99,7 @@ class CriarTurmaPerseveranca_MEJTest(TestCase):
         resp = self.client.get(r('core:criar_turma_perseveranca_mej'))
         self.assertEqual(resp.status_code, HTTPStatus.OK)
         self.assertIn('form', resp.context)
-        self.assertContains(resp, 'Coordenação · Perseverança / MEJ')
+        self.assertContains(resp, 'Coordenação · MEJ')
         self.assertContains(resp, f'href="{r("core:dashboard_turmas_perseveranca_mej")}"')
 
     def test_post_cria_turma_da_perseveranca_mej(self):
