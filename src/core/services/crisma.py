@@ -4,6 +4,7 @@ from reportlab.lib import colors
 from reportlab.platypus import Frame, Paragraph
 
 from ._common import (
+    desenhar_verificacao_secretaria,
     CABECALHO_PATH,
     novo_canvas,
     desenhar_cabecalho,
@@ -215,6 +216,7 @@ def gerar_ficha_crisma_menor(ficha):
     )
     frame = Frame(250, height - 940, 500, 200)
     frame.addFromList([paragrafo], c)
+    desenhar_verificacao_secretaria(c, height - 940)
     
     
     
@@ -423,6 +425,7 @@ def gerar_ficha_crisma_maior(ficha):
     )
     frame = Frame(250, height - 940, 500, 200)
     frame.addFromList([paragrafo], c)
+    desenhar_verificacao_secretaria(c, height - 940)
     
     
     
@@ -499,6 +502,7 @@ def gerar_ficha_crisma_maior(ficha):
     )
     frame = Frame(250, height - 940, 500, 200)
     frame.addFromList([paragrafo], c)
+    desenhar_verificacao_secretaria(c, height - 940)
     
     c.showPage()  # Página 3 
     
@@ -544,6 +548,7 @@ def gerar_ficha_crisma_maior(ficha):
     )
     frame = Frame(250, height - 660, 500, 200)
     frame.addFromList([paragrafo], c)
+    desenhar_verificacao_secretaria(c, height - 660)
     
     
 

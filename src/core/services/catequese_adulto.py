@@ -1,7 +1,7 @@
 from reportlab.lib import colors
 from reportlab.platypus import Frame, Paragraph
 
-from ._common import CABECALHO_PATH, novo_canvas, desenhar_cabecalho, estilo_paragrafo, data_hoje
+from ._common import CABECALHO_PATH, novo_canvas, desenhar_cabecalho, estilo_paragrafo, data_hoje, desenhar_verificacao_secretaria
 
 
 def gerar_ficha_catequese_adulto(ficha):
@@ -127,6 +127,7 @@ def gerar_ficha_catequese_adulto(ficha):
     )
     frame = Frame(250, height - 940, 500, 200)
     frame.addFromList([paragrafo], c)
+    desenhar_verificacao_secretaria(c, height - 940)
     
     c.showPage()  # Página 2
     
@@ -200,6 +201,7 @@ def gerar_ficha_catequese_adulto(ficha):
     )
     frame = Frame(250, height - 940, 500, 200)
     frame.addFromList([paragrafo], c)
+    desenhar_verificacao_secretaria(c, height - 940)
     
     c.showPage()  # Página 3 
     
@@ -245,6 +247,7 @@ def gerar_ficha_catequese_adulto(ficha):
     )
     frame = Frame(250, height - 660, 500, 200)
     frame.addFromList([paragrafo], c)
+    desenhar_verificacao_secretaria(c, height - 660)
     
     
 

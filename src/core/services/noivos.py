@@ -1,7 +1,7 @@
 from reportlab.lib import colors
 from reportlab.platypus import Frame, Paragraph
 
-from ._common import CABECALHO_PATH, novo_canvas, desenhar_cabecalho, estilo_paragrafo, data_hoje
+from ._common import CABECALHO_PATH, novo_canvas, desenhar_cabecalho, estilo_paragrafo, data_hoje, desenhar_verificacao_secretaria
 
 
 def gerar_ficha_noivos(ficha):
@@ -92,13 +92,16 @@ def gerar_ficha_noivos(ficha):
     frame = Frame(250, height - 940, 500, 200)
     frame.addFromList([paragrafo], c)
 
-    paragrafo = Paragraph(f"______________________________ <br/> {ficha.nome_noivo}", style)
-    frame = Frame(50, height - 980, 500, 200)
+    # Três colunas: noivo, noiva e a conferência da secretaria
+    paragrafo = Paragraph(f"_________________________<br/>{ficha.nome_noivo}", style)
+    frame = Frame(50, height - 980, 170, 200)
     frame.addFromList([paragrafo], c)
 
-    paragrafo = Paragraph(f"______________________________ <br/> {ficha.nome_noiva}", style)
-    frame = Frame(300, height - 980, 500, 200)
+    paragrafo = Paragraph(f"_________________________<br/>{ficha.nome_noiva}", style)
+    frame = Frame(220, height - 980, 170, 200)
     frame.addFromList([paragrafo], c)
+
+    desenhar_verificacao_secretaria(c, height - 980, linhas_antes=0, x=390, largura=170, tracos=25)
     
     c.showPage()  # Página 2
     
@@ -169,13 +172,16 @@ def gerar_ficha_noivos(ficha):
     frame = Frame(250, height - 940, 500, 200)
     frame.addFromList([paragrafo], c)
 
-    paragrafo = Paragraph(f"______________________________ <br/> {ficha.nome_noivo}", style)
-    frame = Frame(50, height - 980, 500, 200)
+    # Três colunas: noivo, noiva e a conferência da secretaria
+    paragrafo = Paragraph(f"_________________________<br/>{ficha.nome_noivo}", style)
+    frame = Frame(50, height - 980, 170, 200)
     frame.addFromList([paragrafo], c)
 
-    paragrafo = Paragraph(f"______________________________ <br/> {ficha.nome_noiva}", style)
-    frame = Frame(300, height - 980, 500, 200)
+    paragrafo = Paragraph(f"_________________________<br/>{ficha.nome_noiva}", style)
+    frame = Frame(220, height - 980, 170, 200)
     frame.addFromList([paragrafo], c)
+
+    desenhar_verificacao_secretaria(c, height - 980, linhas_antes=0, x=390, largura=170, tracos=25)
     
     c.showPage()  # Página 3 
     
@@ -219,13 +225,16 @@ def gerar_ficha_noivos(ficha):
     frame = Frame(250, height - 630, 500, 200)
     frame.addFromList([paragrafo], c)
 
-    paragrafo = Paragraph(f"______________________________ <br/> {ficha.nome_noivo}", style)
-    frame = Frame(50, height - 670, 500, 200)
+    # Três colunas: noivo, noiva e a conferência da secretaria
+    paragrafo = Paragraph(f"_________________________<br/>{ficha.nome_noivo}", style)
+    frame = Frame(50, height - 670, 170, 200)
     frame.addFromList([paragrafo], c)
 
-    paragrafo = Paragraph(f"______________________________ <br/> {ficha.nome_noiva}", style)
-    frame = Frame(300, height - 670, 500, 200)
+    paragrafo = Paragraph(f"_________________________<br/>{ficha.nome_noiva}", style)
+    frame = Frame(220, height - 670, 170, 200)
     frame.addFromList([paragrafo], c)
+
+    desenhar_verificacao_secretaria(c, height - 670, linhas_antes=0, x=390, largura=170, tracos=25)
 
     
     

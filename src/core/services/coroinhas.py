@@ -2,6 +2,7 @@ from reportlab.lib import colors
 from reportlab.platypus import Frame, Paragraph
 
 from ._common import (
+    desenhar_verificacao_secretaria,
     CABECALHO_PATH,
     novo_canvas,
     desenhar_cabecalho,
@@ -49,6 +50,7 @@ def gerar_ficha_coroinhas(ficha):
     )
     frame = Frame(250, height - 700, 500, 200)
     frame.addFromList([paragrafo], c)
+    desenhar_verificacao_secretaria(c, height - 700)
     
     
     
@@ -123,6 +125,7 @@ def gerar_ficha_coroinhas(ficha):
     )
     frame = Frame(250, height - 940, 500, 200)
     frame.addFromList([paragrafo], c)
+    desenhar_verificacao_secretaria(c, height - 940)
 
 
     c.showPage()  # Página 3

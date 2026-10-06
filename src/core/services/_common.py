@@ -61,6 +61,21 @@ def estilo_paragrafo():
     return style
 
 
+def desenhar_verificacao_secretaria(c, y, linhas_antes=2, x=50, largura=190, tracos=28):
+    """Campo "Documento verificado por", onde a secretaria assina após conferir a ficha.
+
+    Fica ao lado da assinatura do responsável. ``y`` é o mesmo do Frame da
+    assinatura; ``linhas_antes`` é quantas linhas o bloco da assinatura tem antes
+    do traço (data + linha em branco = 2), para que os dois traços fiquem alinhados.
+    """
+    paragrafo = Paragraph(
+        "&nbsp;<br/>" * linhas_antes + "_" * tracos + "<br/>Documento verificado por",
+        estilo_paragrafo(),
+    )
+    frame = Frame(x, y, largura, 200)
+    frame.addFromList([paragrafo], c)
+
+
 def pagina_termo_consentimento_menor_catequese(c, img_path, height, ficha):
     """Página "TERMO DE CONSENTIMENTO ... DE CRIANÇAS E ADOLESCENTES".
 
@@ -136,6 +151,7 @@ def pagina_termo_consentimento_menor_catequese(c, img_path, height, ficha):
     )
     frame = Frame(250, height - 940, 500, 200)
     frame.addFromList([paragrafo], c)
+    desenhar_verificacao_secretaria(c, height - 940)
 
 
 
@@ -186,4 +202,5 @@ def pagina_autorizacao_imagem_menor(c, img_path, height, ficha):
     )
     frame = Frame(250, height - 660, 500, 200)
     frame.addFromList([paragrafo], c)
+    desenhar_verificacao_secretaria(c, height - 660)
     
