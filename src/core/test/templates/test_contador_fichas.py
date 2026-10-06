@@ -1,6 +1,7 @@
 from datetime import date
 
 from django.shortcuts import resolve_url as r
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from core.models import CatequeseAdultoModel, CrismaModel, TurmaCatequeseAdulto, TurmaCrisma
@@ -17,6 +18,8 @@ class TotalCrismaPorTurmaTest(TestCase):
                 nome=f"Crismando {i}", sexo='M', data_nascimento=date(2010, 1, 1),
                 endereco='Rua X', cidade='Rio Claro', uf='SP', turma=turma,
             )
+        get_user_model().objects.create_user(username='coordenacao', password='senha12345', is_staff=True)
+        self.client.login(username='coordenacao', password='senha12345')
         self.resp = self.client.get(r('core:total'))
 
     def test_get(self):
@@ -41,6 +44,8 @@ class TotalCatequeseAdultoPorTurmaTest(TestCase):
                 endereco='Rua X', cidade='Rio Claro', uf='SP', estado_civil='Solteiro',
                 turma=turma,
             )
+        get_user_model().objects.create_user(username='coordenacao', password='senha12345', is_staff=True)
+        self.client.login(username='coordenacao', password='senha12345')
         self.resp = self.client.get(r('core:total'))
 
     def test_total_catequese_adulto_por_turma(self):

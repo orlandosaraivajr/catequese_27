@@ -7,7 +7,7 @@ from django.test import TestCase, Client
 User = get_user_model()
 
 # Rotas restritas à coordenação (staff).
-ROTAS_RESTRITAS = ('core:crisma', 'core:exportar-excel')
+ROTAS_RESTRITAS = ('core:crisma', 'core:exportar-excel', 'core:total')
 
 
 class AcessoRestritoAnonimoTest(TestCase):
@@ -48,3 +48,8 @@ class AcessoRestritoStaffTest(TestCase):
         resp = self.client.get(r('core:exportar-excel'))
         self.assertEqual(resp.status_code, HTTPStatus.OK)
         self.assertIn('attachment;', resp['Content-Disposition'])
+
+    def test_staff_acessa_total_de_inscricoes(self):
+        resp = self.client.get(r('core:total'))
+        self.assertEqual(resp.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(resp, 'contador_fichas.html')

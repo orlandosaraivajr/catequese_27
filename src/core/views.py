@@ -262,6 +262,7 @@ def remover_ficha_coroinhas(request):
         ficha.delete()
     return redirect('core:listar_fichas')
 
+@coordenacao_required
 def total(request):
     # Catequese Infantil
     qs = (

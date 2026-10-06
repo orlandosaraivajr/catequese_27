@@ -137,6 +137,18 @@ class DashboardAreaUsuarioTest(TestCase):
         self.assertContains(self.resp, f'href="{r("core:exportar-excel")}"')
         self.assertContains(self.resp, 'Relatório')
 
+    def test_menu_tem_link_do_total_de_inscricoes(self):
+        self.assertContains(self.resp, f'href="{r("core:total")}"')
+        self.assertContains(self.resp, 'Total de Inscrições')
+
+    def test_total_de_inscricoes_fica_entre_turmas_adulto_e_relatorio(self):
+        html = self.resp.content.decode()
+        adulto = html.index('Turmas Catequese Adulto')
+        total = html.index('Total de Inscrições')
+        relatorio = html.index(f'href="{r("core:exportar-excel")}"')
+        self.assertLess(adulto, total)
+        self.assertLess(total, relatorio)
+
     def test_link_do_relatorio_baixa_planilha(self):
         resp = self.client.get(r('core:exportar-excel'))
         self.assertEqual(resp.status_code, HTTPStatus.OK)
