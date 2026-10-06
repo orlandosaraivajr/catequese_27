@@ -3,7 +3,6 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib.auth.views import LoginView
-from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.utils.timezone import localtime
 from django.http import HttpResponse, FileResponse
@@ -362,8 +361,11 @@ class CoordenacaoLoginView(LoginView):
         return super().dispatch(request, *args, **kwargs)
 
 
-@require_POST
 def coordenacao_logout(request):
+    if request.method != 'POST':
+        # GET não desloga (evita logout forçado via link/imagem de outro site);
+        # apenas leva de volta à área da coordenação.
+        return redirect('core:coordenacao')
     logout(request)
     messages.info(request, 'Você saiu da área da coordenação.')
     return redirect('core:coordenacao')

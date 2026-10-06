@@ -97,10 +97,22 @@ class CoordenacaoLogoutTest(TestCase):
         self.assertRedirects(resp, r('core:coordenacao'))
         self.assertNotIn(SESSION_KEY, self.client.session)
 
-    def test_get_nao_permitido(self):
-        resp = self.client.get(self.url)
-        self.assertEqual(resp.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
+    def test_get_nao_faz_logout(self):
+        self.client.get(self.url)
         self.assertIn(SESSION_KEY, self.client.session)
+
+    def test_get_redireciona_para_area_da_coordenacao(self):
+        resp = self.client.get(self.url)
+        self.assertRedirects(resp, r('core:coordenacao'), fetch_redirect_response=False)
+
+    def test_get_logado_acaba_no_dashboard(self):
+        resp = self.client.get(self.url, follow=True)
+        self.assertRedirects(resp, r('core:dashboard_turmas_catequese'))
+
+    def test_get_anonimo_acaba_no_login(self):
+        resp = Client().get(self.url, follow=True)
+        self.assertRedirects(resp, r('core:coordenacao'))
+        self.assertTemplateUsed(resp, 'coordenacao_login.html')
 
     def test_apos_logout_dashboard_exige_login(self):
         self.client.post(self.url)
