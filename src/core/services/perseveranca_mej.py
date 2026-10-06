@@ -106,12 +106,8 @@ def gerar_ficha_perseveranca_mej_menor_idade(ficha):
     
     c.setFont("Helvetica", 11)
     c.drawString(50, height - 440, f"Horário:")
-    if ficha.horario == '1':
-        c.setFillColor(colors.blue)
-        c.drawString(150, height - 440, f"{ficha.get_horario_display()}")
-    else:
-        c.setFillColor(colors.red)
-        c.drawString(150, height - 440, f"{ficha.get_horario_display()}")
+    c.setFillColor(colors.blue)
+    c.drawString(150, height - 440, f"{ficha.turma.nome}")
     c.setFillColor(colors.black)
     
 # Cuidado e Acolhimento da Criança
@@ -323,12 +319,8 @@ def gerar_ficha_perseveranca_mej_maior_idade(ficha):
     
     c.setFont("Helvetica", 11)
     c.drawString(50, height - 440, f"Horário:")
-    if ficha.horario == '1':
-        c.setFillColor(colors.blue)
-        c.drawString(150, height - 440, f"{ficha.get_horario_display()}")
-    else:
-        c.setFillColor(colors.red)
-        c.drawString(150, height - 440, f"{ficha.get_horario_display()}")
+    c.setFillColor(colors.blue)
+    c.drawString(150, height - 440, f"{ficha.turma.nome}")
     c.setFillColor(colors.black)
     
 # Cuidado e Acolhimento da Criança

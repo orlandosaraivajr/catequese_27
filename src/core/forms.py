@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.forms import AuthenticationForm
 from datetime import date
-from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil, TurmaCrisma, TurmaCatequeseAdulto
+from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil, TurmaCrisma, TurmaCatequeseAdulto, TurmaPerseveranca_MEJ
 
 
 class TurmaFormMixin:
@@ -389,7 +389,10 @@ class CrismaForm(TurmaFormMixin, ModelForm):
         return cleaned_data
 
 
-class PerseverancaMejForm(ModelForm):
+class PerseverancaMejForm(TurmaFormMixin, ModelForm):
+    turma_model = TurmaPerseveranca_MEJ
+    mensagem_turma_obrigatoria = "Selecione um horário para a Perseverança / MEJ."
+
     class Meta:
         model = Perseveranca_MEJ_Model
         fields = '__all__'
@@ -407,6 +410,8 @@ class PerseverancaMejForm(ModelForm):
             'endereco': 'Endereço:',
             'cidade': 'Cidade:',
             'uf': 'UF:',
+
+            'turma': 'Horário da Perseverança / MEJ:',
 
             'celular_pai': 'Celular do Pai:',
             'celular_mae': 'Celular da Mãe:',
@@ -465,7 +470,7 @@ class PerseverancaMejForm(ModelForm):
             'primeira_eucaristia_celebrante': forms.TextInput(attrs={'class': 'form-control'}),
 
                # Horário Catequese
-            'horario': forms.Select(attrs={'class': 'form-select'}),
+            'turma': forms.Select(attrs={'class': 'form-select'}),
 
             # Necessidades especiais
             'possui_deficiencia': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
@@ -921,6 +926,18 @@ class TurmaCatequeseAdultoForm(TurmaForm):
             'nome': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Ex: Quinta às 19:30h - SEM Batismo',
+            }),
+        }
+
+
+class TurmaPerseveranca_MEJForm(TurmaForm):
+    class Meta(TurmaForm.Meta):
+        model = TurmaPerseveranca_MEJ
+        widgets = {
+            **TurmaForm.Meta.widgets,
+            'nome': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: MEJ - 15 a 25 anos - Quinta às 19:30h',
             }),
         }
 

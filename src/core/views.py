@@ -6,8 +6,8 @@ from django.contrib import messages
 from django.utils.timezone import localtime
 from django.http import HttpResponse, FileResponse
 from django.db.models import Count
-from .forms import CatequeseInfantilForm, CrismaForm, PerseverancaMejForm, CatequeseAdultoForm, NoivoForm, CoroinhaForm, TurmaForm, TurmaCrismaForm, TurmaCatequeseAdultoForm, CoordenacaoLoginForm
-from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil, TurmaCrisma, TurmaCatequeseAdulto
+from .forms import CatequeseInfantilForm, CrismaForm, PerseverancaMejForm, CatequeseAdultoForm, NoivoForm, CoroinhaForm, TurmaForm, TurmaCrismaForm, TurmaCatequeseAdultoForm, TurmaPerseveranca_MEJForm, CoordenacaoLoginForm
+from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil, TurmaCrisma, TurmaCatequeseAdulto, TurmaPerseveranca_MEJ
 from .services import gerar_ficha_catequese, gerar_ficha_crisma, gerar_ficha_perseveranca_mej
 from .services import gerar_ficha_catequese_adulto, gerar_ficha_noivos ,  gerar_Workbook, gerar_ficha_coroinhas
 
@@ -295,14 +295,13 @@ def total(request):
     # Perseverança / MEJ
     qs = (
         Perseveranca_MEJ_Model.objects
-        .values('horario')
+        .values('turma__nome')
         .annotate(quantidade=Count('id'))
         .order_by('-quantidade')
     )
-    horarios_dict = dict(Perseveranca_MEJ_Model.HORARIO_PERSEVERANCA)
     total_perseveranca_mej = [
         {
-            "titulo": horarios_dict.get(item["horario"]),
+            "titulo": item["turma__nome"],
             "quantidade": item["quantidade"]
         }
         for item in qs
@@ -370,7 +369,8 @@ def coordenacao_logout(request):
 
 
 # ---------------------------------------------------------------------------
-# Dashboard da coordenação -- turmas da Catequese Infantil, Crisma e Catequese de Adultos
+# Dashboard da coordenação -- turmas da Catequese Infantil, Crisma, Catequese de Adultos
+# e Perseverança / MEJ
 # ---------------------------------------------------------------------------
 
 # Tudo o que muda entre os dashboards de turmas: modelo, formulário, textos e
@@ -406,6 +406,17 @@ TURMAS_CATEQUESE_ADULTO = {
     'url_criar': 'core:criar_turma_catequese_adulto',
     'url_editar': 'core:editar_turma_catequese_adulto',
     'url_alternar': 'core:alternar_turma_catequese_adulto_ativa',
+}
+
+TURMAS_PERSEVERANCA_MEJ = {
+    'modelo': TurmaPerseveranca_MEJ,
+    'form': TurmaPerseveranca_MEJForm,
+    'titulo': 'Turmas Perseverança / MEJ',
+    'subtitulo': 'Coordenação · Perseverança / MEJ',
+    'url_dashboard': 'core:dashboard_turmas_perseveranca_mej',
+    'url_criar': 'core:criar_turma_perseveranca_mej',
+    'url_editar': 'core:editar_turma_perseveranca_mej',
+    'url_alternar': 'core:alternar_turma_perseveranca_mej_ativa',
 }
 
 
@@ -511,3 +522,23 @@ def editar_turma_catequese_adulto(request, turma_id):
 @coordenacao_required
 def alternar_turma_catequese_adulto_ativa(request, turma_id):
     return _alternar_turma_ativa(request, TURMAS_CATEQUESE_ADULTO, turma_id)
+
+
+@coordenacao_required
+def dashboard_turmas_perseveranca_mej(request):
+    return _dashboard_turmas(request, TURMAS_PERSEVERANCA_MEJ)
+
+
+@coordenacao_required
+def criar_turma_perseveranca_mej(request):
+    return _criar_turma(request, TURMAS_PERSEVERANCA_MEJ)
+
+
+@coordenacao_required
+def editar_turma_perseveranca_mej(request, turma_id):
+    return _editar_turma(request, TURMAS_PERSEVERANCA_MEJ, turma_id)
+
+
+@coordenacao_required
+def alternar_turma_perseveranca_mej_ativa(request, turma_id):
+    return _alternar_turma_ativa(request, TURMAS_PERSEVERANCA_MEJ, turma_id)

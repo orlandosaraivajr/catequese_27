@@ -4,7 +4,10 @@ from django.shortcuts import resolve_url as r
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from core.models import CatequeseAdultoModel, CrismaModel, TurmaCatequeseAdulto, TurmaCrisma
+from core.models import (
+    CatequeseAdultoModel, CrismaModel, Perseveranca_MEJ_Model,
+    TurmaCatequeseAdulto, TurmaCrisma, TurmaPerseveranca_MEJ,
+)
 
 
 class TotalCrismaPorTurmaTest(TestCase):
@@ -52,4 +55,27 @@ class TotalCatequeseAdultoPorTurmaTest(TestCase):
         self.assertEqual(self.resp.context['total_catequese_adulto'], [
             {"titulo": "Sábado às 09h - SEM Batismo", "quantidade": 3},
             {"titulo": "Quinta às 19:30h - SEM Batismo", "quantidade": 1},
+        ])
+
+
+class TotalPerseverancaMejPorTurmaTest(TestCase):
+    """O relatório de totais agrupa as fichas da Perseverança / MEJ pelo nome da turma."""
+
+    def setUp(self):
+        quinta = TurmaPerseveranca_MEJ.objects.create(nome="MEJ - Quinta às 19:30h")
+        terca = TurmaPerseveranca_MEJ.objects.create(nome="MEJ - Terça às 19:30h")
+        for i, turma in enumerate((terca, terca, quinta)):
+            Perseveranca_MEJ_Model.objects.create(
+                nome=f"Jovem {i}", sexo='M', data_nascimento=date(2012, 1, 1),
+                endereco='Rua X', cidade='Rio Claro', uf='SP', turma=turma,
+                nome_responsavel='Resp Teste', cpf_responsavel='1', endereco_responsavel='Rua X',
+            )
+        get_user_model().objects.create_user(username='coordenacao', password='senha12345', is_staff=True)
+        self.client.login(username='coordenacao', password='senha12345')
+        self.resp = self.client.get(r('core:total'))
+
+    def test_total_perseveranca_mej_por_turma(self):
+        self.assertEqual(self.resp.context['total_perseveranca_mej'], [
+            {"titulo": "MEJ - Terça às 19:30h", "quantidade": 2},
+            {"titulo": "MEJ - Quinta às 19:30h", "quantidade": 1},
         ])

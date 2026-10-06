@@ -1,9 +1,10 @@
 from django.test import TestCase
-from core.models import Perseveranca_MEJ_Model
+from core.models import Perseveranca_MEJ_Model, TurmaPerseveranca_MEJ
 
 
 class PerseverancaMEJModelTest(TestCase):
     def setUp(self):
+        self.turma = TurmaPerseveranca_MEJ.objects.create(nome="Perseverança e MEJ - 11 a 14 anos - Quinta às 19:30h - Encontros na Capela NSGraças")
         self.cadastro = Perseveranca_MEJ_Model.objects.create(
             nome="Ana Beatriz Souza",
             sexo="F",
@@ -32,7 +33,7 @@ class PerseverancaMEJModelTest(TestCase):
             primeira_eucaristia_paroquia="Paróquia São Judas",
             primeira_eucaristia_celebrante="Pe. André",
 
-            horario="1",
+            turma=self.turma,
 
             possui_deficiencia=True,
             descricao_deficiencia="Deficiência visual leve",
@@ -130,8 +131,11 @@ class PerseverancaMEJModelTest(TestCase):
         self.assertEqual(self.cadastro.primeira_eucaristia_celebrante, "Pe. André")
 
     # ---------- HORÁRIO ----------
-    def test_horario(self):
-        self.assertEqual(self.cadastro.horario, "1")
+    def test_turma(self):
+        self.assertEqual(self.cadastro.turma, self.turma)
+
+    def test_turma_lista_inscritos(self):
+        self.assertIn(self.cadastro, self.turma.inscritos.all())
 
     # ---------- DEFICIÊNCIA ----------
     def test_possui_deficiencia(self):

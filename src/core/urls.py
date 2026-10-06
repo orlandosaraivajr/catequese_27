@@ -63,4 +63,10 @@ urlpatterns = [
     path('coordenacao/turmas_catequese_adulto/nova', views.criar_turma_catequese_adulto, name='criar_turma_catequese_adulto'),
     path('coordenacao/turmas_catequese_adulto/<int:turma_id>/editar', views.editar_turma_catequese_adulto, name='editar_turma_catequese_adulto'),
     path('coordenacao/turmas_catequese_adulto/<int:turma_id>/alternar', views.alternar_turma_catequese_adulto_ativa, name='alternar_turma_catequese_adulto_ativa'),
+
+    # Dashboard da coordenação -- turmas da Perseverança / MEJ
+    path('coordenacao/turmas_perseveranca_mej', views.dashboard_turmas_perseveranca_mej, name='dashboard_turmas_perseveranca_mej'),
+    path('coordenacao/turmas_perseveranca_mej/nova', views.criar_turma_perseveranca_mej, name='criar_turma_perseveranca_mej'),
+    path('coordenacao/turmas_perseveranca_mej/<int:turma_id>/editar', views.editar_turma_perseveranca_mej, name='editar_turma_perseveranca_mej'),
+    path('coordenacao/turmas_perseveranca_mej/<int:turma_id>/alternar', views.alternar_turma_perseveranca_mej_ativa, name='alternar_turma_perseveranca_mej_ativa'),
 ]

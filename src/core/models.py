@@ -66,6 +66,10 @@ class TurmaCatequeseAdulto(TurmaBase):
     """Turma/horário da Catequese de Adultos."""
 
 
+class TurmaPerseveranca_MEJ(TurmaBase):
+    """Turma/horário da Perseverança / MEJ."""
+
+
 class CatequeseInfantilModel(models.Model):
     SEXO_CHOICES = (
         ("M", "Masculino"),
@@ -203,13 +207,6 @@ class Perseveranca_MEJ_Model(models.Model):
         ("F", "Feminino"),
     )
     
-    HORARIO_PERSEVERANCA = (
-        ("1", "Perseverança e MEJ - 11 a 14 anos - Quinta às 19:30h - Encontros na Capela NSGraças"),
-        ("2", "MEJ - 15 a 25 anos - Quinta às 19:30h - Encontros na Capela NSGraças"),
-        ("3", "Perseverança e MEJ - 11 a 14 anos - Terça às 19:30h - Encontros na Capela NSGraças"),
-        ("4", "MEJ - 15 a 25 anos - Terça às 19:30h - Encontros na Capela NSGraças"),
-    )
-
     nome = models.CharField(max_length=150)
     sexo = models.CharField(max_length=1, choices=SEXO_CHOICES)
     data_nascimento = models.DateField()
@@ -237,7 +234,9 @@ class Perseveranca_MEJ_Model(models.Model):
     primeira_eucaristia_paroquia = models.CharField(max_length=150, blank=True, null=True)
     primeira_eucaristia_celebrante = models.CharField(max_length=150, blank=True, null=True)
 
-    horario = models.CharField(max_length=2, choices=HORARIO_PERSEVERANCA)
+    turma = models.ForeignKey(
+        TurmaPerseveranca_MEJ, on_delete=models.PROTECT, related_name="inscritos",
+    )
     
     possui_deficiencia = models.BooleanField(default=False)
     descricao_deficiencia = models.TextField(blank=True, null=True)

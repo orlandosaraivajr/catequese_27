@@ -272,7 +272,7 @@ def gerar_Workbook():
             registro.primeira_eucaristia_paroquia,
             registro.primeira_eucaristia_celebrante,
 
-            registro.get_horario_display(),
+            registro.turma.nome,
 
             'Sim' if registro.possui_deficiencia else 'Não',
             registro.descricao_deficiencia,

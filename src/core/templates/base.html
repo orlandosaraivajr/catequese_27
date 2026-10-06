@@ -526,6 +526,9 @@
             <a class="gc-menu-item {% if rota == 'dashboard_turmas_catequese_adulto' or rota == 'criar_turma_catequese_adulto' or rota == 'editar_turma_catequese_adulto' %}ativo{% endif %}" href="{% url 'core:dashboard_turmas_catequese_adulto' %}">
                 <span class="material-symbols-outlined">menu_book</span> Turmas Catequese Adulto
             </a>
+            <a class="gc-menu-item {% if rota == 'dashboard_turmas_perseveranca_mej' or rota == 'criar_turma_perseveranca_mej' or rota == 'editar_turma_perseveranca_mej' %}ativo{% endif %}" href="{% url 'core:dashboard_turmas_perseveranca_mej' %}">
+                <span class="material-symbols-outlined">groups</span> Turmas Perseverança / MEJ
+            </a>
             <a class="gc-menu-item {% if rota == 'total' %}ativo{% endif %}" href="{% url 'core:total' %}">
                 <span class="material-symbols-outlined">bar_chart</span> Total de Inscrições
             </a>
