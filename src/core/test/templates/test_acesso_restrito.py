@@ -16,7 +16,7 @@ ROTAS_SECRETARIA = ('core:secretaria', 'core:listar_fichas', 'core:listar_todas_
 ACOES_SECRETARIA = tuple(f'core:{acao}_ficha{p}' for acao in ('imprimir', 'assinar', 'remover') for p in PASTORAIS)
 # Telas exclusivas da coordenação (GET)
 ROTAS_COORDENACAO = (
-    'core:crisma', 'core:exportar-excel', 'core:total',
+    'core:exportar-excel', 'core:total',
     'core:dashboard_turmas_catequese', 'core:dashboard_turmas_crisma',
     'core:dashboard_turmas_catequese_adulto', 'core:dashboard_turmas_perseveranca_mej',
 )
@@ -53,6 +53,11 @@ class VisitanteTest(TestCase):
                 self.assertRedirects(
                     resp, f"{r('core:coordenacao')}?next={r(rota)}", fetch_redirect_response=False,
                 )
+
+    def test_formularios_de_inscricao_sao_publicos(self):
+        for rota in ('core:catequese_infantil', 'core:catequese_adulto', 'core:crisma'):
+            with self.subTest(rota=rota):
+                self.assertEqual(self.client.get(r(rota)).status_code, HTTPStatus.OK)
 
     def test_acoes_da_secretaria_levam_ao_login_e_nao_alteram_fichas(self):
         ficha = criar_ficha()
@@ -135,7 +140,7 @@ class CoordenacaoTest(TestCase):
             with self.subTest(rota=rota):
                 self.assertEqual(self.client.get(r(rota)).status_code, HTTPStatus.OK)
 
-    def test_staff_logado_acessa_formulario_da_crisma(self):
+    def test_acessa_formulario_da_crisma(self):
         resp = self.client.get(r('core:crisma'))
         self.assertTemplateUsed(resp, 'crisma.html')
 

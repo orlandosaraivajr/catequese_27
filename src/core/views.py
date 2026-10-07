@@ -25,7 +25,6 @@ def catequese_infantil(request):
         form = CatequeseInfantilForm()
     return render(request, 'catequese_infantil.html', {'form': form})
 
-@coordenacao_required
 def crisma(request):
     if request.method == 'POST':
         form = CrismaForm(request.POST)
