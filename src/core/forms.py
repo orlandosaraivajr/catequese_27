@@ -2,6 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from django.contrib.auth.forms import AuthenticationForm
 from datetime import date
+from .acessos import tem_acesso
 from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil, TurmaCrisma, TurmaCatequeseAdulto, TurmaPerseveranca_MEJ
 
 
@@ -943,11 +944,11 @@ class TurmaPerseveranca_MEJForm(TurmaForm):
 
 
 class CoordenacaoLoginForm(AuthenticationForm):
-    """Login da coordenação: somente usuários staff podem entrar."""
+    """Login da área restrita: somente usuários da secretaria ou da coordenação podem entrar."""
 
     error_messages = {
         **AuthenticationForm.error_messages,
-        'nao_staff': 'Este usuário não tem acesso à área da coordenação.',
+        'sem_acesso': 'Este usuário não tem acesso à área restrita.',
     }
 
     def __init__(self, *args, **kwargs):
@@ -959,5 +960,5 @@ class CoordenacaoLoginForm(AuthenticationForm):
 
     def confirm_login_allowed(self, user):
         super().confirm_login_allowed(user)
-        if not user.is_staff:
-            raise forms.ValidationError(self.error_messages['nao_staff'], code='nao_staff')
+        if not tem_acesso(user):
+            raise forms.ValidationError(self.error_messages['sem_acesso'], code='sem_acesso')

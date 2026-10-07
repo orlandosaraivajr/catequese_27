@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import logout
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
@@ -9,10 +8,8 @@ from django.db.models import Count
 from .forms import CatequeseInfantilForm, CrismaForm, PerseverancaMejForm, CatequeseAdultoForm, NoivoForm, CoroinhaForm, TurmaForm, TurmaCrismaForm, TurmaCatequeseAdultoForm, TurmaPerseveranca_MEJForm, CoordenacaoLoginForm
 from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil, TurmaCrisma, TurmaCatequeseAdulto, TurmaPerseveranca_MEJ
 from .services import gerar_ficha_catequese, gerar_ficha_crisma, gerar_ficha_perseveranca_mej
+from .acessos import coordenacao_required, secretaria_required, tem_acesso, pagina_inicial
 from .services import gerar_ficha_catequese_adulto, gerar_ficha_noivos ,  gerar_Workbook, gerar_ficha_coroinhas
-
-# Views da coordenação redirecionam para o login próprio, e não para o admin
-coordenacao_required = staff_member_required(login_url='core:coordenacao')
 
 
 def index(request):
@@ -82,6 +79,7 @@ def coroinhas(request):
 def procure_secretaria(request):
     return render(request, 'procure_secretaria.html')
 
+@secretaria_required
 def listar_fichas(request):
     fichas = CatequeseInfantilModel.objects.filter(ficha_impressa=False).filter(ficha_assinada=False).order_by('nome')
     fichasCrisma = CrismaModel.objects.filter(ficha_impressa=False).filter(ficha_assinada=False).order_by('nome')
@@ -97,6 +95,7 @@ def listar_fichas(request):
                 'mensagem': mensagem}
     return render(request, 'listar_fichas.html', contexto)
 
+@secretaria_required
 def listar_todas_fichas(request):
     fichas = CatequeseInfantilModel.objects.all().filter(ficha_assinada=False).order_by('nome')
     fichasCrisma = CrismaModel.objects.all().filter(ficha_assinada=False).order_by('nome')
@@ -112,6 +111,7 @@ def listar_todas_fichas(request):
                 'mensagem': mensagem}
     return render(request, 'listar_fichas.html', contexto)
 
+@secretaria_required
 def imprimir_ficha(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
@@ -122,6 +122,7 @@ def imprimir_ficha(request):
         return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
     return redirect('core:listar_fichas')
 
+@secretaria_required
 def assinar_ficha(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
@@ -130,6 +131,7 @@ def assinar_ficha(request):
         ficha.save()
     return redirect('core:listar_fichas')
 
+@secretaria_required
 def remover_ficha(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
@@ -137,6 +139,7 @@ def remover_ficha(request):
         ficha.delete()
     return redirect('core:listar_fichas')
 
+@secretaria_required
 def imprimir_ficha_crisma(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
@@ -147,6 +150,7 @@ def imprimir_ficha_crisma(request):
         return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
     return redirect('core:listar_fichas')
 
+@secretaria_required
 def assinar_ficha_crisma(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
@@ -155,6 +159,7 @@ def assinar_ficha_crisma(request):
         ficha.save()
     return redirect('core:listar_fichas')
 
+@secretaria_required
 def remover_ficha_crisma(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
@@ -162,6 +167,7 @@ def remover_ficha_crisma(request):
         ficha.delete()
     return redirect('core:listar_fichas')
 
+@secretaria_required
 def imprimir_ficha_perseveranca_mej(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
@@ -172,6 +178,7 @@ def imprimir_ficha_perseveranca_mej(request):
         return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
     return redirect('core:listar_fichas')
 
+@secretaria_required
 def assinar_ficha_perseveranca_mej(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
@@ -180,6 +187,7 @@ def assinar_ficha_perseveranca_mej(request):
         ficha.save()
     return redirect('core:listar_fichas')
 
+@secretaria_required
 def remover_ficha_perseveranca_mej(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
@@ -187,6 +195,7 @@ def remover_ficha_perseveranca_mej(request):
         ficha.delete()
     return redirect('core:listar_fichas')
 
+@secretaria_required
 def imprimir_ficha_adulto(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
@@ -197,6 +206,7 @@ def imprimir_ficha_adulto(request):
         return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
     return redirect('core:listar_fichas')
 
+@secretaria_required
 def assinar_ficha_adulto(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
@@ -205,6 +215,7 @@ def assinar_ficha_adulto(request):
         ficha.save()
     return redirect('core:listar_fichas')
 
+@secretaria_required
 def remover_ficha_adulto(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
@@ -212,6 +223,7 @@ def remover_ficha_adulto(request):
         ficha.delete()
     return redirect('core:listar_fichas')
 
+@secretaria_required
 def imprimir_ficha_noivos(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
@@ -222,6 +234,7 @@ def imprimir_ficha_noivos(request):
         return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
     return redirect('core:listar_fichas')
 
+@secretaria_required
 def assinar_ficha_noivos(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
@@ -230,6 +243,7 @@ def assinar_ficha_noivos(request):
         ficha.save()
     return redirect('core:listar_fichas')
 
+@secretaria_required
 def remover_ficha_noivos(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
@@ -237,6 +251,7 @@ def remover_ficha_noivos(request):
         ficha.delete()
     return redirect('core:listar_fichas')
 
+@secretaria_required
 def imprimir_ficha_coroinhas(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
@@ -247,6 +262,7 @@ def imprimir_ficha_coroinhas(request):
         return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
     return redirect('core:listar_fichas')
 
+@secretaria_required
 def assinar_ficha_coroinhas(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
@@ -255,6 +271,7 @@ def assinar_ficha_coroinhas(request):
         ficha.save()
     return redirect('core:listar_fichas')
 
+@secretaria_required
 def remover_ficha_coroinhas(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
@@ -343,7 +360,7 @@ def exportar_excel(request):
 
 
 # ---------------------------------------------------------------------------
-# Login / logout da coordenação
+# Login / logout da área restrita (secretaria e coordenação)
 # ---------------------------------------------------------------------------
 
 class CoordenacaoLoginView(LoginView):
@@ -351,11 +368,15 @@ class CoordenacaoLoginView(LoginView):
     authentication_form = CoordenacaoLoginForm
 
     def dispatch(self, request, *args, **kwargs):
-        # Coordenadora já logada vai direto para a dashboard.
-        # (Usuário comum logado vê o formulário, evitando loop de redirect.)
-        if request.user.is_authenticated and request.user.is_staff:
+        # Secretaria/coordenação já logada vai direto para a sua página inicial.
+        # (Usuário sem acesso logado vê o formulário, evitando loop de redirect.)
+        if request.user.is_authenticated and tem_acesso(request.user):
             return redirect(self.get_success_url())
         return super().dispatch(request, *args, **kwargs)
+
+    def get_default_redirect_url(self):
+        # Sem ?next=, a coordenação vai para as turmas e a secretaria para as fichas.
+        return pagina_inicial(self.request.user)
 
 
 def coordenacao_logout(request):

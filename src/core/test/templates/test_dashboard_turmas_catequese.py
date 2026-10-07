@@ -5,6 +5,7 @@ from django.shortcuts import resolve_url as r
 from http import HTTPStatus
 
 from core.models import TurmaCatequeseInfantil, TurmaCrisma
+from core.test.acessos import GRUPO_COORDENACAO, GRUPO_SECRETARIA, criar_usuario
 
 User = get_user_model()
 
@@ -21,17 +22,24 @@ class DashboardTurmasCatequeseAcessoTest(TestCase):
         self.assertEqual(resp.status_code, HTTPStatus.FOUND)
         self.assertTrue(resp.url.startswith(r('core:coordenacao')))
 
-    def test_usuario_comum_recebe_redirect(self):
+    def test_usuario_sem_grupo_recebe_acesso_negado(self):
         User.objects.create_user(username='comum', password='senha12345')
         self.client.login(username='comum', password='senha12345')
         resp = self.client.get(self.url)
-        self.assertEqual(resp.status_code, HTTPStatus.FOUND)
+        self.assertEqual(resp.status_code, HTTPStatus.FORBIDDEN)
+        self.assertTemplateUsed(resp, '403.html')
+
+    def test_secretaria_recebe_acesso_negado(self):
+        criar_usuario('secretaria', GRUPO_SECRETARIA)
+        self.client.login(username='secretaria', password='senha12345')
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, HTTPStatus.FORBIDDEN)
 
     def test_rota(self):
         self.assertEqual(self.url, '/coordenacao/turmas_catequese')
 
     def test_staff_acessa_normalmente(self):
-        User.objects.create_user(username='coordenacao', password='senha12345', is_staff=True)
+        criar_usuario('coordenacao', GRUPO_COORDENACAO)
         self.client.login(username='coordenacao', password='senha12345')
         resp = self.client.get(self.url)
         self.assertEqual(resp.status_code, HTTPStatus.OK)
@@ -41,7 +49,7 @@ class DashboardTurmasCatequeseAcessoTest(TestCase):
 class DashboardTurmasCatequeseListagemTest(TestCase):
     def setUp(self):
         self.client = Client()
-        User.objects.create_user(username='coordenacao', password='senha12345', is_staff=True)
+        criar_usuario('coordenacao', GRUPO_COORDENACAO)
         self.client.login(username='coordenacao', password='senha12345')
         self.turma = TurmaCatequeseInfantil.objects.create(nome="1a Etapa - Quarta às 19:30h", idade_maxima=date(2015, 1, 1), idade_minima=date(2017, 12, 31))
 
@@ -79,7 +87,7 @@ class DashboardTurmasCatequeseListagemTest(TestCase):
 class CriarTurmaCatequeseTest(TestCase):
     def setUp(self):
         self.client = Client()
-        User.objects.create_user(username='coordenacao', password='senha12345', is_staff=True)
+        criar_usuario('coordenacao', GRUPO_COORDENACAO)
         self.client.login(username='coordenacao', password='senha12345')
 
     def test_get_exibe_formulario(self):
@@ -106,7 +114,7 @@ class CriarTurmaCatequeseTest(TestCase):
 class EditarTurmaCatequeseTest(TestCase):
     def setUp(self):
         self.client = Client()
-        User.objects.create_user(username='coordenacao', password='senha12345', is_staff=True)
+        criar_usuario('coordenacao', GRUPO_COORDENACAO)
         self.client.login(username='coordenacao', password='senha12345')
         self.turma = TurmaCatequeseInfantil.objects.create(nome="Turma Teste")
 
@@ -134,7 +142,7 @@ class EditarTurmaCatequeseTest(TestCase):
 class AlternarTurmaCatequeseAtivaTest(TestCase):
     def setUp(self):
         self.client = Client()
-        User.objects.create_user(username='coordenacao', password='senha12345', is_staff=True)
+        criar_usuario('coordenacao', GRUPO_COORDENACAO)
         self.client.login(username='coordenacao', password='senha12345')
         self.turma = TurmaCatequeseInfantil.objects.create(nome="Turma Teste", ativa=True)
 

@@ -3,11 +3,13 @@ from django.shortcuts import resolve_url as r
 from http import HTTPStatus
 from core.models import CatequeseInfantilModel, TurmaCatequeseInfantil
 from datetime import date
+from core.test.acessos import GRUPO_SECRETARIA, logar
 
 
 class ListarFichasGetTest(TestCase):
     def setUp(self):
         self.client = Client()
+        logar(self.client, 'secretaria', GRUPO_SECRETARIA)
         self.url = r('core:listar_fichas')
 
     def test_status_code(self):
@@ -31,6 +33,7 @@ class ListarFichasGetTest(TestCase):
 class ListarFichasSemRegistrosTest(TestCase):
     def setUp(self):
         self.client = Client()
+        logar(self.client, 'secretaria', GRUPO_SECRETARIA)
         self.url = r('core:listar_fichas')
         self.resp = self.client.get(self.url)
 
@@ -42,6 +45,7 @@ class ListarFichasSemRegistrosTest(TestCase):
 class ListarFichasUmRegistroTest(TestCase):
     def setUp(self):
         self.client = Client()
+        logar(self.client, 'secretaria', GRUPO_SECRETARIA)
         self.url = r('core:listar_fichas')
         self.turma = TurmaCatequeseInfantil.objects.create(nome="1a Etapa - Quarta às 19:30h", idade_maxima=date(2015, 1, 1), idade_minima=date(2017, 12, 31))
 
@@ -71,6 +75,7 @@ class ListarFichasUmRegistroTest(TestCase):
 class ListarFichasDoisRegistrosTest(TestCase):
     def setUp(self):
         self.client = Client()
+        logar(self.client, 'secretaria', GRUPO_SECRETARIA)
         self.url = r('core:listar_fichas')
         self.turma = TurmaCatequeseInfantil.objects.create(nome="1a Etapa - Quarta às 19:30h", idade_maxima=date(2015, 1, 1), idade_minima=date(2017, 12, 31))
 

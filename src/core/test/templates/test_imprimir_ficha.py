@@ -8,6 +8,7 @@ import os
 import tempfile
 
 from core.models import CatequeseInfantilModel, TurmaCatequeseInfantil
+from core.test.acessos import GRUPO_SECRETARIA, logar
 
 
 # Helper para criar ficha válida
@@ -34,6 +35,7 @@ def criar_ficha():
 class ImprimirFichaGetTest(TestCase):
     def setUp(self):
         self.client = Client()
+        logar(self.client, 'secretaria', GRUPO_SECRETARIA)
         self.url = r("core:imprimir_ficha")
         self.resp = self.client.get(self.url)
 
@@ -48,6 +50,7 @@ class ImprimirFichaGetTest(TestCase):
 class ImprimirFichaPostTest(TestCase):
     def setUp(self):
         self.client = Client()
+        logar(self.client, 'secretaria', GRUPO_SECRETARIA)
         self.ficha = criar_ficha()
         self.url = r("core:imprimir_ficha")
 

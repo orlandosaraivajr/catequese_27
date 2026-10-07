@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block titulo %}Entrar - Coordenação{% endblock %}
+{% block titulo %}Entrar - Área restrita{% endblock %}
 
 {% block conteudo %}
 <div class="container py-5" style="max-width: 460px;">
@@ -10,13 +10,13 @@
                 <span class="material-symbols-outlined" style="font-size:2rem;">church</span>
             </span>
             <h1 class="h3 mb-1">Fazer login</h1>
-            <p class="text-muted mb-0">Área da Coordenação</p>
+            <p class="text-muted mb-0">Secretaria e Coordenação</p>
         </div>
 
-        {% if user.is_authenticated and not user.is_staff %}
+        {% if user.is_authenticated and not perms.core.acessar_secretaria and not perms.core.acessar_coordenacao %}
             <div class="alert alert-danger d-flex gap-2">
                 <span class="material-symbols-outlined">error</span>
-                <span>Você está conectado como <strong>{{ user.get_username }}</strong>, que não tem acesso à coordenação. Entre com outro usuário.</span>
+                <span>Você está conectado como <strong>{{ user.get_username }}</strong>, que não tem acesso à área restrita. Entre com outro usuário.</span>
             </div>
         {% endif %}
 

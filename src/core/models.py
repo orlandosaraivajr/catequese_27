@@ -2,6 +2,22 @@ from django.db import models
 from django.utils import timezone
 
 
+class Acesso(models.Model):
+    """Âncora das permissões de acesso às áreas restritas (não cria tabela).
+
+    As permissões são entregues aos grupos "secretaria" e "coordenacao"
+    (ver core/acessos.py e a migração 0008).
+    """
+
+    class Meta:
+        managed = False
+        default_permissions = ()
+        permissions = [
+            ("acessar_secretaria", "Pode acessar a secretaria (listar, imprimir, assinar e remover fichas)"),
+            ("acessar_coordenacao", "Pode acessar a coordenação (turmas, totais e relatório)"),
+        ]
+
+
 class TurmaBase(models.Model):
     """Campos e regras comuns às turmas/horários gerenciáveis pela coordenação.
 

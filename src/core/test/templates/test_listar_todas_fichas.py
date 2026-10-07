@@ -3,6 +3,7 @@ from django.shortcuts import resolve_url as r
 from http import HTTPStatus
 from datetime import date
 from core.models import CatequeseInfantilModel, TurmaCatequeseInfantil
+from core.test.acessos import GRUPO_SECRETARIA, logar
 
 
 # Helper para criar fichas válidas
@@ -28,6 +29,7 @@ def criar_ficha(nome="Ana", sexo="F", impresso=False):
 class ListarTodasFichasGetTest(TestCase):
     def setUp(self):
         self.client = Client()
+        logar(self.client, 'secretaria', GRUPO_SECRETARIA)
         self.resp = self.client.get(r("core:listar_todas_fichas"))
 
     def test_status_code(self):
@@ -47,6 +49,7 @@ class ListarTodasFichasGetTest(TestCase):
 class ListarTodasFichasZeroRegistrosTest(TestCase):
     def setUp(self):
         self.client = Client()
+        logar(self.client, 'secretaria', GRUPO_SECRETARIA)
         self.resp = self.client.get(r("core:listar_todas_fichas"))
 
     def test_lista_vazia(self):
@@ -57,6 +60,7 @@ class ListarTodasFichasZeroRegistrosTest(TestCase):
 class ListarTodasFichasUmRegistroTest(TestCase):
     def setUp(self):
         self.client = Client()
+        logar(self.client, 'secretaria', GRUPO_SECRETARIA)
         self.f1 = criar_ficha(nome="Ana")
         self.resp = self.client.get(r("core:listar_todas_fichas"))
 
@@ -69,6 +73,7 @@ class ListarTodasFichasUmRegistroTest(TestCase):
 class ListarTodasFichasDoisRegistrosTest(TestCase):
     def setUp(self):
         self.client = Client()
+        logar(self.client, 'secretaria', GRUPO_SECRETARIA)
         self.f1 = criar_ficha(nome="Ana")
         self.f2 = criar_ficha(nome="Bruno", sexo="M")
         self.resp = self.client.get(r("core:listar_todas_fichas"))

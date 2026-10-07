@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model, SESSION_KEY
 from django.test import TestCase, Client
 from django.shortcuts import resolve_url as r
 from http import HTTPStatus
+from core.test.acessos import GRUPO_COORDENACAO, criar_usuario
 
 User = get_user_model()
 
@@ -27,7 +28,7 @@ class CoordenacaoLoginPostTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = r('core:coordenacao')
-        User.objects.create_user(username='coordenadora', password='senha12345', is_staff=True)
+        criar_usuario('coordenadora', GRUPO_COORDENACAO)
         User.objects.create_user(username='comum', password='senha12345')
 
     def test_staff_faz_login_e_vai_para_dashboard(self):
@@ -54,14 +55,14 @@ class CoordenacaoLoginPostTest(TestCase):
         self.assertTrue(resp.context['form'].errors)
         self.assertNotIn(SESSION_KEY, self.client.session)
 
-    def test_usuario_nao_staff_nao_loga(self):
+    def test_usuario_sem_grupo_nao_loga(self):
         resp = self.client.post(self.url, {'username': 'comum', 'password': 'senha12345'})
         self.assertEqual(resp.status_code, HTTPStatus.OK)
-        self.assertContains(resp, 'não tem acesso à área da coordenação')
+        self.assertContains(resp, 'não tem acesso à área restrita')
         self.assertNotIn(SESSION_KEY, self.client.session)
 
     def test_usuario_inativo_nao_loga(self):
-        User.objects.create_user(username='inativa', password='senha12345', is_staff=True, is_active=False)
+        criar_usuario('inativa', GRUPO_COORDENACAO, is_active=False)
         resp = self.client.post(self.url, {'username': 'inativa', 'password': 'senha12345'})
         self.assertEqual(resp.status_code, HTTPStatus.OK)
         self.assertNotIn(SESSION_KEY, self.client.session)
@@ -72,7 +73,7 @@ class CoordenacaoLoginJaAutenticadoTest(TestCase):
         self.client = Client()
 
     def test_staff_logado_e_redirecionado_para_dashboard(self):
-        User.objects.create_user(username='coordenadora', password='senha12345', is_staff=True)
+        criar_usuario('coordenadora', GRUPO_COORDENACAO)
         self.client.login(username='coordenadora', password='senha12345')
         resp = self.client.get(r('core:coordenacao'))
         self.assertRedirects(resp, r('core:dashboard_turmas_catequese'))
@@ -89,7 +90,7 @@ class CoordenacaoLogoutTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = r('core:coordenacao_logout')
-        User.objects.create_user(username='coordenadora', password='senha12345', is_staff=True)
+        criar_usuario('coordenadora', GRUPO_COORDENACAO)
         self.client.login(username='coordenadora', password='senha12345')
 
     def test_post_faz_logout_e_volta_para_login(self):
@@ -126,7 +127,7 @@ class DashboardAreaUsuarioTest(TestCase):
 
     def setUp(self):
         self.client = Client()
-        User.objects.create_user(username='coordenadora', password='senha12345', is_staff=True)
+        criar_usuario('coordenadora', GRUPO_COORDENACAO)
         self.client.login(username='coordenadora', password='senha12345')
         self.resp = self.client.get(r('core:dashboard_turmas_catequese'))
 

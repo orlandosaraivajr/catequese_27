@@ -511,10 +511,12 @@
             <a class="gc-menu-item {% if rota == 'index' %}ativo{% endif %}" href="{% url 'core:index' %}">
                 <span class="material-symbols-outlined">home</span> Pré-Inscrição
             </a>
+            {% if perms.core.acessar_secretaria %}
             <a class="gc-menu-item {% if rota == 'secretaria' or rota == 'listar_fichas' or rota == 'listar_todas_fichas' %}ativo{% endif %}" href="{% url 'core:secretaria' %}">
                 <span class="material-symbols-outlined">assignment</span> Secretaria
             </a>
-            {% if user.is_authenticated and user.is_staff %}
+            {% endif %}
+            {% if perms.core.acessar_coordenacao %}
             <hr>
             <div class="gc-menu-secao">Coordenação</div>
             <a class="gc-menu-item {% if rota == 'dashboard_turmas_catequese' or rota == 'criar_turma_catequese' or rota == 'editar_turma_catequese' %}ativo{% endif %}" href="{% url 'core:dashboard_turmas_catequese' %}">
@@ -535,6 +537,8 @@
             <a class="gc-menu-item" href="{% url 'core:exportar-excel' %}">
                 <span class="material-symbols-outlined">download</span> Relatório
             </a>
+            {% endif %}
+            {% if perms.core.acessar_secretaria or perms.core.acessar_coordenacao %}
             <hr>
             <form method="POST" action="{% url 'core:coordenacao_logout' %}">
                 {% csrf_token %}
@@ -545,7 +549,7 @@
             {% else %}
             <hr>
             <a class="gc-menu-item {% if rota == 'coordenacao' %}ativo{% endif %}" href="{% url 'core:coordenacao' %}">
-                <span class="material-symbols-outlined">login</span> Entrar (Coordenação)
+                <span class="material-symbols-outlined">login</span> Entrar
             </a>
             {% endif %}
         </div>
