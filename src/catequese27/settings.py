@@ -19,6 +19,9 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])  # converte 'a,b' -> ['a',
 LOGIN_URL = 'admin:login'
 LOGIN_REDIRECT_URL = 'core:dashboard_turmas_catequese'
 
+SESSION_COOKIE_SECURE = True   # W012
+CSRF_COOKIE_SECURE = True      # W016
+
 
 
 # Application definition
