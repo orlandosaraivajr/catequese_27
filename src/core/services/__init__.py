@@ -10,7 +10,7 @@ para que `from .services import gerar_ficha_catequese, ...` em views.py
 continue funcionando sem mudanças.
 """
 from ._common import data_hoje
-from .catequese_infantil import gerar_ficha_catequese
+from .catequese_infantil import gerar_ficha_catequese, gerar_ficha_sementinha
 from .crisma import gerar_ficha_crisma, gerar_ficha_crisma_menor, gerar_ficha_crisma_maior
 from .perseveranca_mej import (
     gerar_ficha_perseveranca_mej,
@@ -25,6 +25,7 @@ from .excel import gerar_Workbook
 __all__ = [
     "data_hoje",
     "gerar_ficha_catequese",
+    "gerar_ficha_sementinha",
     "gerar_ficha_crisma",
     "gerar_ficha_crisma_menor",
     "gerar_ficha_crisma_maior",

@@ -15,6 +15,65 @@ from ._common import (
 )
 
 
+def _desenhar_sacramento(c, x, y, recebeu, titulo, titulo_nao, data, diocese, paroquia, celebrante):
+    """Uma coluna com os dados de um sacramento (ou o aviso, em vermelho, de que não o recebeu)."""
+    c.setFont("Helvetica-Bold", 11)
+    if not recebeu:
+        c.setFillColor(colors.red)
+        c.drawString(x, y, titulo_nao)
+        c.setFillColor(colors.black)
+        return
+    c.drawString(x, y, titulo)
+    c.setFont("Helvetica", 10)
+    c.drawString(x, y - 13, f"Data: {data.strftime('%d/%m/%Y') if data else ''}")
+    c.drawString(x, y - 26, f"Diocese: {diocese or ''}")
+    c.drawString(x, y - 39, f"Paróquia: {paroquia or ''}")
+    c.drawString(x, y - 52, f"Celebrante: {celebrante or ''}")
+
+
+def desenhar_sacramentos(c, height, ficha):
+    """Batismo (à esquerda) e Primeira Eucaristia (à direita), lado a lado na primeira página."""
+    _desenhar_sacramento(
+        c, 50, height - 375, ficha.batizado, "Batizado", "Não Batizado",
+        ficha.batizado_data, ficha.batizado_diocese, ficha.batizado_paroquia, ficha.batizado_celebrante,
+    )
+    _desenhar_sacramento(
+        c, 300, height - 375, ficha.primeira_eucaristia, "Primeira Eucaristia", "Não Fez Primeira Eucaristia",
+        ficha.primeira_eucaristia_data, ficha.primeira_eucaristia_diocese,
+        ficha.primeira_eucaristia_paroquia, ficha.primeira_eucaristia_celebrante,
+    )
+
+
+def pagina_declaracao_padrinho(c, img_path, height, ficha):
+    """Página "DECLARAÇÃO DE CIÊNCIA E RESPONSABILIDADE" sobre a escolha do padrinho/madrinha.
+
+    Exclusiva da Crisma. Sob o traço da assinatura vão o nome e o CPF do responsável.
+    """
+    desenhar_cabecalho(c, img_path, height, y=140)
+    c.setFont("Helvetica-Bold", 13)
+    c.drawString(130, height - 160, "DECLARAÇÃO DE CIÊNCIA E RESPONSABILIDADE")
+    style = estilo_paragrafo()
+
+    paragrafo = Paragraph(
+        "Declaro estar ciente de que, conforme as normas da Igreja Católica e as orientações da Diocese de "
+        "Piracicaba, o padrinho ou madrinha de Crisma deverá ser católico(a), ter no mínimo 16 anos, ter "
+        "recebido os sacramentos do Batismo, da Eucaristia e da Crisma e levar uma vida coerente com a fé "
+        "católica. Não poderá ser pai, mãe ou cônjuge do crismando. Comprometo-me a respeitar essas "
+        "exigências na escolha do padrinho ou madrinha, conforme as normas da Igreja.",
+        style
+    )
+    frame = Frame(50, height - 400, 500, 200)
+    frame.addFromList([paragrafo], c)
+
+    paragrafo = Paragraph(
+            f"Rio Claro, {data_hoje()}<br/><br/> _____________________________________________<br/> {ficha.nome_responsavel} - CPF: {ficha.cpf_responsavel}",
+        style
+    )
+    frame = Frame(250, height - 500, 500, 200)
+    frame.addFromList([paragrafo], c)
+    desenhar_verificacao_secretaria(c, height - 500)
+
+
 def gerar_ficha_crisma(ficha):
     anos = ((date.today() - ficha.data_nascimento)/365.2425).days
     if anos < 18:
@@ -80,28 +139,14 @@ def gerar_ficha_crisma_menor(ficha):
     c.setFont("Helvetica", 11)
     c.drawString(150, height - 355, f"{ficha.cidade}  -  {ficha.uf}")
     
-    # Batizado
-    c.setFont("Helvetica-Bold", 11)
-    if ficha.batizado:
-        c.drawString(50, height - 375, f"Batizado")
-        c.setFont("Helvetica", 11)
-        c.drawString(50, height - 390, f"Data: {ficha.batizado_data.strftime("%d/%m/%Y") if ficha.batizado_data else ''}")
-        c.drawString(50, height - 405, f"Diocese: {ficha.batizado_diocese}   Paróquia: {ficha.batizado_paroquia}")
-        c.drawString(50, height - 420, f"Celebrante: {ficha.batizado_celebrante} ")
-        
-    else:
-        c.setFillColor(colors.red)
-        c.setFont("Helvetica-Bold", 11)
-        c.drawString(50, height - 375, f"Não Batizado")
-        c.setFillColor(colors.black)
-    
-    
+    desenhar_sacramentos(c, height, ficha)
+
     c.setFont("Helvetica", 11)
-    c.drawString(50, height - 440, f"Horário:")
+    c.drawString(50, height - 445, f"Horário:")
     c.setFillColor(colors.blue)
-    c.drawString(150, height - 440, f"{ficha.turma.nome} ")
+    c.drawString(150, height - 445, f"{ficha.turma.nome} ")
     c.setFillColor(colors.black)
-    
+
     style = estilo_paragrafo()
 
 # Cuidado e Acolhimento da Criança
@@ -227,6 +272,9 @@ def gerar_ficha_crisma_menor(ficha):
     c.showPage()  # Página 3
     pagina_autorizacao_imagem_menor(c, img_path, height, ficha)
 
+    c.showPage()  # Página 4
+    pagina_declaracao_padrinho(c, img_path, height, ficha)
+
     c.save()
 
     return filename
@@ -289,28 +337,14 @@ def gerar_ficha_crisma_maior(ficha):
     c.setFont("Helvetica", 11)
     c.drawString(150, height - 355, f"{ficha.cidade}  -  {ficha.uf}")
     
-    # Batizado
-    c.setFont("Helvetica-Bold", 11)
-    if ficha.batizado:
-        c.drawString(50, height - 375, f"Batizado")
-        c.setFont("Helvetica", 11)
-        c.drawString(50, height - 390, f"Data: {ficha.batizado_data.strftime("%d/%m/%Y") if ficha.batizado_data else ''}")
-        c.drawString(50, height - 405, f"Diocese: {ficha.batizado_diocese}   Paróquia: {ficha.batizado_paroquia}")
-        c.drawString(50, height - 420, f"Celebrante: {ficha.batizado_celebrante} ")
-        
-    else:
-        c.setFillColor(colors.red)
-        c.setFont("Helvetica-Bold", 11)
-        c.drawString(50, height - 375, f"Não Batizado")
-        c.setFillColor(colors.black)
-    
-    
+    desenhar_sacramentos(c, height, ficha)
+
     c.setFont("Helvetica", 11)
-    c.drawString(50, height - 440, f"Horário:")
+    c.drawString(50, height - 445, f"Horário:")
     c.setFillColor(colors.blue)
-    c.drawString(150, height - 440, f"{ficha.turma.nome} ")
+    c.drawString(150, height - 445, f"{ficha.turma.nome} ")
     c.setFillColor(colors.black)
-    
+
     style = estilo_paragrafo()
 
 # Cuidado e Acolhimento da Criança
@@ -549,8 +583,9 @@ def gerar_ficha_crisma_maior(ficha):
     frame = Frame(250, height - 660, 500, 200)
     frame.addFromList([paragrafo], c)
     desenhar_verificacao_secretaria(c, height - 660)
-    
-    
+
+    c.showPage()  # Página 4
+    pagina_declaracao_padrinho(c, img_path, height, ficha)
 
     c.save()
 

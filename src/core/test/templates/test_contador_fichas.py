@@ -4,8 +4,8 @@ from django.shortcuts import resolve_url as r
 from django.test import TestCase
 
 from core.models import (
-    CatequeseAdultoModel, CrismaModel, Perseveranca_MEJ_Model,
-    TurmaCatequeseAdulto, TurmaCrisma, TurmaPerseveranca_MEJ,
+    CatequeseAdultoModel, CrismaModel, Perseveranca_MEJ_Model, SementinhaModel,
+    TurmaCatequeseAdulto, TurmaCrisma, TurmaPerseveranca_MEJ, TurmaSementinha,
 )
 from core.test.acessos import GRUPO_COORDENACAO, criar_usuario
 
@@ -79,3 +79,29 @@ class TotalPerseverancaMejPorTurmaTest(TestCase):
             {"titulo": "MEJ - Terça às 19:30h", "quantidade": 2},
             {"titulo": "MEJ - Quinta às 19:30h", "quantidade": 1},
         ])
+
+
+class TotalSementinhaPorTurmaTest(TestCase):
+    """O relatório de totais agrupa as fichas da Sementinha pelo nome da turma."""
+
+    def setUp(self):
+        sabado = TurmaSementinha.objects.create(nome="Sementinha - Sábado às 9:00h")
+        domingo = TurmaSementinha.objects.create(nome="Sementinha - Domingo às 9:00h")
+        for i, turma in enumerate((domingo, sabado, sabado)):
+            SementinhaModel.objects.create(
+                nome=f"Criança {i}", sexo='F', data_nascimento=date(2021, 1, 1),
+                endereco='Rua X', cidade='Rio Claro', uf='SP', turma=turma,
+                nome_responsavel='Resp Teste', cpf_responsavel='1', endereco_responsavel='Rua X',
+            )
+        criar_usuario('coordenacao', GRUPO_COORDENACAO)
+        self.client.login(username='coordenacao', password='senha12345')
+        self.resp = self.client.get(r('core:total'))
+
+    def test_total_sementinha_por_turma(self):
+        self.assertEqual(self.resp.context['total_sementinha'], [
+            {"titulo": "Sementinha - Sábado às 9:00h", "quantidade": 2},
+            {"titulo": "Sementinha - Domingo às 9:00h", "quantidade": 1},
+        ])
+
+    def test_exibe_tabela_da_sementinha(self):
+        self.assertContains(self.resp, 'Sementinha - Sábado às 9:00h')

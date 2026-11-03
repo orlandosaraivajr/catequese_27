@@ -74,6 +74,10 @@ class TurmaCatequeseInfantil(TurmaBase):
     """Turma/horário da Catequese Infantil."""
 
 
+class TurmaSementinha(TurmaBase):
+    """Turma/horário da Sementinha (crianças menores que as da Catequese Infantil)."""
+
+
 class TurmaCrisma(TurmaBase):
     """Turma/horário da Crisma."""
 
@@ -115,6 +119,68 @@ class CatequeseInfantilModel(models.Model):
     
     turma = models.ForeignKey(
         TurmaCatequeseInfantil, on_delete=models.PROTECT, related_name="inscritos",
+    )
+
+    possui_deficiencia = models.BooleanField(default=False)
+    descricao_deficiencia = models.TextField(blank=True, null=True)
+
+    possui_transtorno = models.BooleanField(default=False)
+    descricao_transtorno = models.TextField(blank=True, null=True)
+
+    medicamento_uso_continuo = models.BooleanField(default=False)
+    descricao_medicamento = models.TextField(blank=True, null=True)
+    medicamento_horario = models.CharField(max_length=100, blank=True, null=True)
+
+    acompanhamento_psicologico = models.BooleanField(default=False)
+    descricao_acompanhamento = models.TextField(blank=True, null=True)
+
+    # Termo de uso de Imagem
+
+    nome_responsavel = models.CharField(max_length=150)
+    cpf_responsavel = models.CharField(max_length=14)
+    endereco_responsavel = models.CharField(max_length=255)
+
+    # Ficha Impressa
+    ficha_impressa = models.BooleanField(default=False)
+    ficha_assinada = models.BooleanField(default=False)
+
+    criado_em = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.nome
+
+
+class SementinhaModel(models.Model):
+    """Pré-cadastro da Sementinha: mesmos dados da Catequese Infantil."""
+
+    SEXO_CHOICES = (
+        ("M", "Masculino"),
+        ("F", "Feminino"),
+    )
+
+    nome = models.CharField(max_length=150)
+    sexo = models.CharField(max_length=1, choices=SEXO_CHOICES)
+    data_nascimento = models.DateField()
+    naturalidade = models.CharField(max_length=100, blank=True, null=True)
+
+    nome_pai = models.CharField(max_length=150, default='')
+    nome_mae = models.CharField(max_length=150, default='')
+
+    endereco = models.CharField(max_length=255)
+    cidade = models.CharField(max_length=100)
+    uf = models.CharField(max_length=2)
+
+    celular_pai = models.CharField(max_length=20, default='')
+    celular_mae = models.CharField(max_length=20, default='')
+
+    batizado = models.BooleanField(default=False)
+    batizado_data = models.DateField(blank=True, null=True)
+    batizado_diocese = models.CharField(max_length=150, blank=True, null=True)
+    batizado_paroquia = models.CharField(max_length=150, blank=True, null=True)
+    batizado_celebrante = models.CharField(max_length=150, blank=True, null=True)
+    
+    turma = models.ForeignKey(
+        TurmaSementinha, on_delete=models.PROTECT, related_name="inscritos",
     )
 
     possui_deficiencia = models.BooleanField(default=False)

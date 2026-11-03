@@ -8,7 +8,7 @@ from django.test import TestCase
 from core.models import CatequeseInfantilModel, TurmaCatequeseInfantil
 from core.test.acessos import GRUPO_COORDENACAO, GRUPO_SECRETARIA, criar_usuario, logar
 
-PASTORAIS = ('', '_crisma', '_perseveranca_mej', '_adulto', '_noivos', '_coroinhas')
+PASTORAIS = ('', '_sementinha', '_crisma', '_perseveranca_mej', '_adulto', '_noivos', '_coroinhas')
 
 # Telas da secretaria (GET)
 ROTAS_SECRETARIA = ('core:secretaria', 'core:listar_fichas', 'core:listar_todas_fichas')
@@ -17,7 +17,7 @@ ACOES_SECRETARIA = tuple(f'core:{acao}_ficha{p}' for acao in ('imprimir', 'assin
 # Telas exclusivas da coordenação (GET)
 ROTAS_COORDENACAO = (
     'core:exportar-excel', 'core:total',
-    'core:dashboard_turmas_catequese', 'core:dashboard_turmas_crisma',
+    'core:dashboard_turmas_catequese', 'core:dashboard_turmas_sementinha', 'core:dashboard_turmas_crisma',
     'core:dashboard_turmas_catequese_adulto', 'core:dashboard_turmas_perseveranca_mej',
 )
 
@@ -55,7 +55,7 @@ class VisitanteTest(TestCase):
                 )
 
     def test_formularios_de_inscricao_sao_publicos(self):
-        for rota in ('core:catequese_infantil', 'core:catequese_adulto', 'core:crisma'):
+        for rota in ('core:catequese_infantil', 'core:sementinha', 'core:catequese_adulto', 'core:crisma'):
             with self.subTest(rota=rota):
                 self.assertEqual(self.client.get(r(rota)).status_code, HTTPStatus.OK)
 

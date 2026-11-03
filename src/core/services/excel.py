@@ -1,17 +1,14 @@
 from django.utils.timezone import localtime
 import openpyxl
 
-from core.models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel
+from core.models import CatequeseInfantilModel, SementinhaModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel
 
 
-def gerar_Workbook():
-    qs = CatequeseInfantilModel.objects.all().order_by('id')
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = "Catequese Infantil"
+def _planilha_infantil(ws, qs, coluna_horario):
+    """Catequese Infantil e Sementinha têm os mesmos campos; muda só a coluna do horário."""
     list_header = ['Nome','Sexo','Data de Nascimento','Naturalidade','Nome do Pai','Nome da Mãe','Endereço','Cidade','UF','Celular do Pai','Celular da Mãe',]
     list_header += ['Batizado','Data do Batismo','Diocese do Batismo','Paróquia do Batismo','Celebrante do Batismo']
-    list_header += ['Horário da Catequese']
+    list_header += [coluna_horario]
     list_header += ['Possui Deficiência', 'Descrição da Deficiência', 'Possui Transtorno', 'Descrição do Transtorno']
     list_header += ['Medicamento de Uso Contínuo',  'Descrição do Medicamento', 'Horário do Medicamento']
     list_header += ['Acompanhamento Psicológico','Descrição do Acompanhamento',]
@@ -53,6 +50,17 @@ def gerar_Workbook():
             "Sim" if registro.ficha_assinada else "Não",    
             localtime(registro.criado_em).strftime('%d/%m/%Y - %H:%M:%S') if registro.criado_em else '',
         ])
+
+
+def gerar_Workbook():
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Catequese Infantil"
+    _planilha_infantil(ws, CatequeseInfantilModel.objects.all().order_by('id'), 'Horário da Catequese')
+
+    ws = wb.create_sheet(title="Sementinha")
+    _planilha_infantil(ws, SementinhaModel.objects.all().order_by('id'), 'Horário da Sementinha')
+
     ws = wb.create_sheet(title="Crisma")
     
     qs = CrismaModel.objects.all().order_by('id')

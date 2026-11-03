@@ -6,6 +6,7 @@ app_name = 'core'
 urlpatterns = [
     path('', views.index, name='index'),
     path('catequese_infantil', views.catequese_infantil, name='catequese_infantil'),
+    path('sementinha', views.sementinha, name='sementinha'),
     path('crisma', views.crisma, name='crisma'),
     path('mej', views.perseveranca_mej, name='perseveranca_mej'),
     path('catequese_adulto', views.catequese_adulto, name='catequese_adulto'),
@@ -20,6 +21,10 @@ urlpatterns = [
     path('imprimir-ficha', views.imprimir_ficha, name='imprimir_ficha'),
     path('assinar-ficha', views.assinar_ficha, name='assinar_ficha'),
     path('remover-ficha', views.remover_ficha, name='remover_ficha'),
+    # Sementinha
+    path('imprimir-ficha-sementinha', views.imprimir_ficha_sementinha, name='imprimir_ficha_sementinha'),
+    path('assinar-ficha-sementinha', views.assinar_ficha_sementinha, name='assinar_ficha_sementinha'),
+    path('remover-ficha-sementinha', views.remover_ficha_sementinha, name='remover_ficha_sementinha'),
     # Crisma
     path('imprimir-ficha-crisma', views.imprimir_ficha_crisma, name='imprimir_ficha_crisma'),
     path('assinar-ficha-crisma', views.assinar_ficha_crisma, name='assinar_ficha_crisma'),
@@ -51,6 +56,12 @@ urlpatterns = [
     path('coordenacao/turmas_catequese/nova', views.criar_turma_catequese, name='criar_turma_catequese'),
     path('coordenacao/turmas_catequese/<int:turma_id>/editar', views.editar_turma_catequese, name='editar_turma_catequese'),
     path('coordenacao/turmas_catequese/<int:turma_id>/alternar', views.alternar_turma_catequese_ativa, name='alternar_turma_catequese_ativa'),
+
+    # Dashboard da coordenação -- turmas da Sementinha
+    path('coordenacao/turmas_sementinha', views.dashboard_turmas_sementinha, name='dashboard_turmas_sementinha'),
+    path('coordenacao/turmas_sementinha/nova', views.criar_turma_sementinha, name='criar_turma_sementinha'),
+    path('coordenacao/turmas_sementinha/<int:turma_id>/editar', views.editar_turma_sementinha, name='editar_turma_sementinha'),
+    path('coordenacao/turmas_sementinha/<int:turma_id>/alternar', views.alternar_turma_sementinha_ativa, name='alternar_turma_sementinha_ativa'),
 
     # Dashboard da coordenação -- turmas da Crisma
     path('coordenacao/turmas_crisma', views.dashboard_turmas_crisma, name='dashboard_turmas_crisma'),

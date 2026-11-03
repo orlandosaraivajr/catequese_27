@@ -13,11 +13,28 @@
     <div class="row g-4">
 
         <div class="col-sm-6 col-lg-4 col-xl-3">
+            <div class="gc-turma cor-lima">
+                <div class="gc-turma-faixa">
+                    <span class="material-symbols-outlined gc-ilustracao" aria-hidden="true">eco</span>
+                    <a href="{% url 'core:sementinha' %}">Sementinha</a>
+                    <small>Pré-Cadastro</small>
+                    <small>a partir de 6 anos</small>
+                </div>
+                <div class="gc-turma-avatar"><span class="material-symbols-outlined">eco</span></div>
+                <div class="gc-turma-corpo">Inscrição para crianças menores, antes da catequese.</div>
+                <div class="gc-turma-rodape">
+                    <a href="{% url 'core:sementinha' %}" class="btn btn-texto btn-sm">Acessar</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-4 col-xl-3">
             <div class="gc-turma cor-verde">
                 <div class="gc-turma-faixa">
                     <span class="material-symbols-outlined gc-ilustracao" aria-hidden="true">child_care</span>
                     <a href="{% url 'core:catequese_infantil' %}">Catequese Infantil</a>
                     <small>Pré-Cadastro</small>
+                    <small>a partir de 8 anos</small>
                 </div>
                 <div class="gc-turma-avatar"><span class="material-symbols-outlined">child_care</span></div>
                 <div class="gc-turma-corpo">Inscrição para crianças.</div>
@@ -26,6 +43,7 @@
                 </div>
             </div>
         </div>
+
 
         <div class="col-sm-6 col-lg-4 col-xl-3">
             <div class="gc-turma cor-azul">
@@ -43,6 +61,21 @@
         </div>
 
         <div class="col-sm-6 col-lg-4 col-xl-3">
+            <div class="gc-turma cor-laranja">
+                <div class="gc-turma-faixa">
+                    <span class="material-symbols-outlined gc-ilustracao" aria-hidden="true">local_fire_department</span>
+                    <a href="{% url 'core:crisma' %}">Crisma</a>
+                    <small>Pré-Cadastro</small>
+                </div>
+                <div class="gc-turma-avatar"><span class="material-symbols-outlined">local_fire_department</span></div>
+                <div class="gc-turma-corpo">Preparação para o sacramento da Crisma.</div>
+                <div class="gc-turma-rodape">
+                    <a href="{% url 'core:crisma' %}" class="btn btn-texto btn-sm">Acessar</a>
+                </div>
+            </div>
+        </div>        
+
+        <div class="col-sm-6 col-lg-4 col-xl-3">
             <div class="gc-turma cor-roxo">
                 <div class="gc-turma-faixa">
                     <span class="material-symbols-outlined gc-ilustracao" aria-hidden="true">menu_book</span>
@@ -57,20 +90,7 @@
             </div>
         </div>
 
-        <div class="col-sm-6 col-lg-4 col-xl-3">
-            <div class="gc-turma cor-laranja">
-                <div class="gc-turma-faixa">
-                    <span class="material-symbols-outlined gc-ilustracao" aria-hidden="true">local_fire_department</span>
-                    <a href="{% url 'core:crisma' %}">Crisma</a>
-                    <small>Pré-Cadastro</small>
-                </div>
-                <div class="gc-turma-avatar"><span class="material-symbols-outlined">local_fire_department</span></div>
-                <div class="gc-turma-corpo">Preparação para o sacramento da Crisma.</div>
-                <div class="gc-turma-rodape">
-                    <a href="{% url 'core:crisma' %}" class="btn btn-texto btn-sm">Acessar</a>
-                </div>
-            </div>
-        </div>
+
 
         <div class="col-sm-6 col-lg-4 col-xl-3">
             <div class="gc-turma cor-rosa">

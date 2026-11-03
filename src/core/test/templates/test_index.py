@@ -17,6 +17,7 @@ class IndexGetTest(TestCase):
     def test_links_para_todas_as_fichas(self):
         rotas = [
             'core:catequese_infantil',
+            'core:sementinha',
             'core:perseveranca_mej',
             'core:catequese_adulto',
             'core:crisma',
@@ -28,7 +29,7 @@ class IndexGetTest(TestCase):
                 self.assertContains(self.resp, f'href="{r(rota)}"')
 
     def test_titulos_das_opcoes(self):
-        for titulo in ('Catequese Infantil', 'MEJ', 'Catequese Adulto',
+        for titulo in ('Catequese Infantil', 'Sementinha', 'MEJ', 'Catequese Adulto',
                        'Crisma', 'Casamento', 'Coroinhas'):
             with self.subTest(titulo):
                 self.assertContains(self.resp, titulo)

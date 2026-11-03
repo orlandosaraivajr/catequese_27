@@ -22,6 +22,7 @@
             --gc-roxo: #8430ce;
             --gc-rosa: #d01884;
             --gc-turquesa: #129eaf;
+            --gc-lima: #5b7f00;
             --gc-vermelho: #d93025;
             --gc-titulo: #202124;
             --gc-texto: #3c4043;
@@ -323,6 +324,7 @@
         .cor-roxo { --gc-cor: var(--gc-roxo); }
         .cor-rosa { --gc-cor: var(--gc-rosa); }
         .cor-turquesa { --gc-cor: var(--gc-turquesa); }
+        .cor-lima { --gc-cor: var(--gc-lima); }
 
         /* Título de seção (como os "tópicos" da aba Atividades) */
         .gc-topico {
@@ -521,6 +523,9 @@
             <div class="gc-menu-secao">Coordenação</div>
             <a class="gc-menu-item {% if rota == 'dashboard_turmas_catequese' or rota == 'criar_turma_catequese' or rota == 'editar_turma_catequese' %}ativo{% endif %}" href="{% url 'core:dashboard_turmas_catequese' %}">
                 <span class="material-symbols-outlined">school</span> Turmas Catequese
+            </a>
+            <a class="gc-menu-item {% if rota == 'dashboard_turmas_sementinha' or rota == 'criar_turma_sementinha' or rota == 'editar_turma_sementinha' %}ativo{% endif %}" href="{% url 'core:dashboard_turmas_sementinha' %}">
+                <span class="material-symbols-outlined">eco</span> Turmas Sementinha
             </a>
             <a class="gc-menu-item {% if rota == 'dashboard_turmas_crisma' or rota == 'criar_turma_crisma' or rota == 'editar_turma_crisma' %}ativo{% endif %}" href="{% url 'core:dashboard_turmas_crisma' %}">
                 <span class="material-symbols-outlined">local_fire_department</span> Turmas Crisma

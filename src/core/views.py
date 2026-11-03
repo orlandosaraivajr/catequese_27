@@ -5,9 +5,9 @@ from django.contrib import messages
 from django.utils.timezone import localtime
 from django.http import HttpResponse, FileResponse
 from django.db.models import Count
-from .forms import CatequeseInfantilForm, CrismaForm, PerseverancaMejForm, CatequeseAdultoForm, NoivoForm, CoroinhaForm, TurmaForm, TurmaCrismaForm, TurmaCatequeseAdultoForm, TurmaPerseveranca_MEJForm, CoordenacaoLoginForm
-from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil, TurmaCrisma, TurmaCatequeseAdulto, TurmaPerseveranca_MEJ
-from .services import gerar_ficha_catequese, gerar_ficha_crisma, gerar_ficha_perseveranca_mej
+from .forms import CatequeseInfantilForm, SementinhaForm, CrismaForm, PerseverancaMejForm, CatequeseAdultoForm, NoivoForm, CoroinhaForm, TurmaForm, TurmaSementinhaForm, TurmaCrismaForm, TurmaCatequeseAdultoForm, TurmaPerseveranca_MEJForm, CoordenacaoLoginForm
+from .models import CatequeseInfantilModel, SementinhaModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil, TurmaSementinha, TurmaCrisma, TurmaCatequeseAdulto, TurmaPerseveranca_MEJ
+from .services import gerar_ficha_catequese, gerar_ficha_sementinha, gerar_ficha_crisma, gerar_ficha_perseveranca_mej
 from .acessos import coordenacao_required, secretaria_required, tem_acesso, pagina_inicial
 from .services import gerar_ficha_catequese_adulto, gerar_ficha_noivos ,  gerar_Workbook, gerar_ficha_coroinhas
 
@@ -24,6 +24,16 @@ def catequese_infantil(request):
     else:
         form = CatequeseInfantilForm()
     return render(request, 'catequese_infantil.html', {'form': form})
+
+def sementinha(request):
+    if request.method == 'POST':
+        form = SementinhaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('core:procure_secretaria')
+    else:
+        form = SementinhaForm()
+    return render(request, 'sementinha.html', {'form': form})
 
 def crisma(request):
     if request.method == 'POST':
@@ -81,13 +91,14 @@ def procure_secretaria(request):
 @secretaria_required
 def listar_fichas(request):
     fichas = CatequeseInfantilModel.objects.filter(ficha_impressa=False).filter(ficha_assinada=False).order_by('nome')
+    fichasSementinha = SementinhaModel.objects.filter(ficha_impressa=False).filter(ficha_assinada=False).order_by('nome')
     fichasCrisma = CrismaModel.objects.filter(ficha_impressa=False).filter(ficha_assinada=False).order_by('nome')
     fichasMEJ = Perseveranca_MEJ_Model.objects.filter(ficha_impressa=False).filter(ficha_assinada=False).order_by('nome')
     fichasAdultos = CatequeseAdultoModel.objects.filter(ficha_impressa=False).filter(ficha_assinada=False).order_by('nome')
     fichasNoivos = NoivoModel.objects.filter(ficha_impressa=False).filter(ficha_assinada=False).order_by('nome_noivo')
     fichasCoroinhas = CoroinhaModel.objects.filter(ficha_impressa=False).filter(ficha_assinada=False).order_by('nome')
     mensagem = 'Fichas Pendentes de Impressão'
-    contexto = {'fichas': fichas,'fichasCrisma': fichasCrisma, 
+    contexto = {'fichas': fichas,'fichasSementinha': fichasSementinha,'fichasCrisma': fichasCrisma, 
                 'fichasMEJ': fichasMEJ,'fichasAdultos': fichasAdultos,
                 'fichasNoivos': fichasNoivos,
                 'fichasCoroinhas': fichasCoroinhas,
@@ -97,13 +108,14 @@ def listar_fichas(request):
 @secretaria_required
 def listar_todas_fichas(request):
     fichas = CatequeseInfantilModel.objects.all().filter(ficha_assinada=False).order_by('nome')
+    fichasSementinha = SementinhaModel.objects.all().filter(ficha_assinada=False).order_by('nome')
     fichasCrisma = CrismaModel.objects.all().filter(ficha_assinada=False).order_by('nome')
     fichasMEJ = Perseveranca_MEJ_Model.objects.all().filter(ficha_assinada=False).order_by('nome')
     fichasAdultos = CatequeseAdultoModel.objects.all().filter(ficha_assinada=False).order_by('nome')
     fichasNoivos = NoivoModel.objects.all().filter(ficha_assinada=False).order_by('nome_noivo')
     fichasCoroinhas = CoroinhaModel.objects.all().filter(ficha_assinada=False).order_by('nome')
     mensagem = 'Fichas Pendentes de Impressão'
-    contexto = {'fichas': fichas,'fichasCrisma': fichasCrisma, 
+    contexto = {'fichas': fichas,'fichasSementinha': fichasSementinha,'fichasCrisma': fichasCrisma, 
                 'fichasMEJ': fichasMEJ,'fichasAdultos': fichasAdultos,
                 'fichasNoivos': fichasNoivos,
                 'fichasCoroinhas': fichasCoroinhas,
@@ -135,6 +147,34 @@ def remover_ficha(request):
     if request.method == 'POST':
         ficha_id = request.POST.get('ficha_id')
         ficha = get_object_or_404(CatequeseInfantilModel, id=ficha_id)
+        ficha.delete()
+    return redirect('core:listar_fichas')
+
+@secretaria_required
+def imprimir_ficha_sementinha(request):
+    if request.method == 'POST':
+        ficha_id = request.POST.get('ficha_id')
+        ficha = get_object_or_404(SementinhaModel, id=ficha_id)
+        ficha.ficha_impressa = True
+        ficha.save()
+        pdf_path = gerar_ficha_sementinha(ficha)
+        return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
+    return redirect('core:listar_fichas')
+
+@secretaria_required
+def assinar_ficha_sementinha(request):
+    if request.method == 'POST':
+        ficha_id = request.POST.get('ficha_id')
+        ficha = get_object_or_404(SementinhaModel, id=ficha_id)
+        ficha.ficha_assinada = True
+        ficha.save()
+    return redirect('core:listar_fichas')
+
+@secretaria_required
+def remover_ficha_sementinha(request):
+    if request.method == 'POST':
+        ficha_id = request.POST.get('ficha_id')
+        ficha = get_object_or_404(SementinhaModel, id=ficha_id)
         ficha.delete()
     return redirect('core:listar_fichas')
 
@@ -294,6 +334,20 @@ def total(request):
         }
         for item in qs
     ]
+    # Sementinha
+    qs = (
+        SementinhaModel.objects
+        .values('turma__nome')
+        .annotate(quantidade=Count('id'))
+        .order_by('-quantidade')
+    )
+    total_sementinha = [
+        {
+            "titulo": item["turma__nome"],
+            "quantidade": item["quantidade"]
+        }
+        for item in qs
+    ]
     # Crisma
     qs = (
         CrismaModel.objects
@@ -340,6 +394,7 @@ def total(request):
     contexto = {
         'mensagem': 'Relatório de Inscrições por Horário',
         'total_catequese_infantil': total_catequese_infantil,
+        'total_sementinha': total_sementinha,
         'total_crisma': total_crisma,
         'total_perseveranca_mej': total_perseveranca_mej,
         'total_catequese_adulto': total_catequese_adulto,
@@ -389,8 +444,8 @@ def coordenacao_logout(request):
 
 
 # ---------------------------------------------------------------------------
-# Dashboard da coordenação -- turmas da Catequese Infantil, Crisma, Catequese de Adultos
-# e Perseverança / MEJ
+# Dashboard da coordenação -- turmas da Catequese Infantil, Sementinha, Crisma,
+# Catequese de Adultos e Perseverança / MEJ
 # ---------------------------------------------------------------------------
 
 # Tudo o que muda entre os dashboards de turmas: modelo, formulário, textos e
@@ -404,6 +459,17 @@ TURMAS_CATEQUESE = {
     'url_criar': 'core:criar_turma_catequese',
     'url_editar': 'core:editar_turma_catequese',
     'url_alternar': 'core:alternar_turma_catequese_ativa',
+}
+
+TURMAS_SEMENTINHA = {
+    'modelo': TurmaSementinha,
+    'form': TurmaSementinhaForm,
+    'titulo': 'Turmas Sementinha',
+    'subtitulo': 'Coordenação · Sementinha',
+    'url_dashboard': 'core:dashboard_turmas_sementinha',
+    'url_criar': 'core:criar_turma_sementinha',
+    'url_editar': 'core:editar_turma_sementinha',
+    'url_alternar': 'core:alternar_turma_sementinha_ativa',
 }
 
 TURMAS_CRISMA = {
@@ -502,6 +568,26 @@ def editar_turma_catequese(request, turma_id):
 @coordenacao_required
 def alternar_turma_catequese_ativa(request, turma_id):
     return _alternar_turma_ativa(request, TURMAS_CATEQUESE, turma_id)
+
+
+@coordenacao_required
+def dashboard_turmas_sementinha(request):
+    return _dashboard_turmas(request, TURMAS_SEMENTINHA)
+
+
+@coordenacao_required
+def criar_turma_sementinha(request):
+    return _criar_turma(request, TURMAS_SEMENTINHA)
+
+
+@coordenacao_required
+def editar_turma_sementinha(request, turma_id):
+    return _editar_turma(request, TURMAS_SEMENTINHA, turma_id)
+
+
+@coordenacao_required
+def alternar_turma_sementinha_ativa(request, turma_id):
+    return _alternar_turma_ativa(request, TURMAS_SEMENTINHA, turma_id)
 
 
 @coordenacao_required

@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.shortcuts import resolve_url as r
 from http import HTTPStatus
-from core.models import CatequeseInfantilModel, TurmaCatequeseInfantil
+from core.models import CatequeseInfantilModel, TurmaCatequeseInfantil, SementinhaModel, TurmaSementinha
 from datetime import date
 from core.test.acessos import GRUPO_SECRETARIA, logar
 
@@ -120,3 +120,40 @@ class ListarFichasDoisRegistrosTest(TestCase):
     def test_quantidade_uma_ficha(self):
         fichas = list(self.resp.context['fichas'])
         self.assertEqual(len(fichas), 1)
+
+
+class ListarFichasSementinhaTest(TestCase):
+    """A secretaria vê as fichas da Sementinha em uma tabela própria."""
+
+    def setUp(self):
+        logar(self.client, 'secretaria', GRUPO_SECRETARIA)
+        turma = TurmaSementinha.objects.create(nome="Sementinha - Sábado às 9:00h")
+        dados = dict(sexo='F', data_nascimento=date(2021, 6, 1), endereco='Rua X', cidade='Araras',
+                     uf='SP', turma=turma, nome_responsavel='Maria da Silva',
+                     cpf_responsavel='123.456.789-00', endereco_responsavel='Rua X')
+        self.pendente = SementinhaModel.objects.create(nome='Ana Pendente', **dados)
+        self.impressa = SementinhaModel.objects.create(nome='Bia Impressa', ficha_impressa=True, **dados)
+        self.assinada = SementinhaModel.objects.create(nome='Caio Assinado', ficha_impressa=True,
+                                                       ficha_assinada=True, **dados)
+
+    def test_pendentes_lista_so_nao_impressas(self):
+        resp = self.client.get(r('core:listar_fichas'))
+        self.assertEqual(list(resp.context['fichasSementinha']), [self.pendente])
+
+    def test_todas_lista_nao_assinadas(self):
+        resp = self.client.get(r('core:listar_todas_fichas'))
+        self.assertEqual(list(resp.context['fichasSementinha']), [self.pendente, self.impressa])
+
+    def test_ficha_pendente_tem_acao_de_imprimir(self):
+        resp = self.client.get(r('core:listar_fichas'))
+        self.assertContains(resp, 'Sementinha')
+        self.assertContains(resp, r('core:imprimir_ficha_sementinha'))
+
+    def test_ficha_impressa_tem_acoes_de_assinar_e_remover(self):
+        resp = self.client.get(r('core:listar_todas_fichas'))
+        self.assertContains(resp, r('core:assinar_ficha_sementinha'))
+        self.assertContains(resp, r('core:remover_ficha_sementinha'))
+
+    def test_fichas_da_sementinha_nao_aparecem_na_catequese(self):
+        resp = self.client.get(r('core:listar_fichas'))
+        self.assertEqual(list(resp.context['fichas']), [])

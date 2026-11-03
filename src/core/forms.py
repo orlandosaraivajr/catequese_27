@@ -3,7 +3,7 @@ from django.forms import ModelForm
 from django.contrib.auth.forms import AuthenticationForm
 from datetime import date
 from .acessos import tem_acesso
-from .models import CatequeseInfantilModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil, TurmaCrisma, TurmaCatequeseAdulto, TurmaPerseveranca_MEJ
+from .models import CatequeseInfantilModel, SementinhaModel, TurmaSementinha, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil, TurmaCrisma, TurmaCatequeseAdulto, TurmaPerseveranca_MEJ
 
 
 class TurmaFormMixin:
@@ -214,6 +214,20 @@ class CatequeseInfantilForm(TurmaFormMixin, ModelForm):
                 self.add_error('batizado_celebrante', 'Informe o celebrante do batismo.')
 
         return cleaned_data
+
+
+class SementinhaForm(CatequeseInfantilForm):
+    """Mesmos campos e validações da Catequese Infantil, com turmas próprias."""
+
+    turma_model = TurmaSementinha
+    mensagem_turma_obrigatoria = "Selecione um horário para a sementinha."
+
+    class Meta(CatequeseInfantilForm.Meta):
+        model = SementinhaModel
+        labels = {
+            **CatequeseInfantilForm.Meta.labels,
+            'turma': 'Horário da Sementinha:',
+        }
 
 
 class CrismaForm(TurmaFormMixin, ModelForm):
@@ -905,6 +919,18 @@ class TurmaForm(ModelForm):
             )
         return cleaned_data
 
+
+
+class TurmaSementinhaForm(TurmaForm):
+    class Meta(TurmaForm.Meta):
+        model = TurmaSementinha
+        widgets = {
+            **TurmaForm.Meta.widgets,
+            'nome': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: Sementinha - Sábado às 9:00h',
+            }),
+        }
 
 
 class TurmaCrismaForm(TurmaForm):

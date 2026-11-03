@@ -21,6 +21,10 @@ def fichas():
             'catequese_infantil', services.gerar_ficha_catequese,
             m.CatequeseInfantilModel(id=1, data_nascimento=date(2016, 1, 1),
                                      turma=m.TurmaCatequeseInfantil(nome='1a Etapa'), **BASE, **RESPONSAVEL)),
+        'sementinha': (
+            'catequese_infantil', services.gerar_ficha_sementinha,
+            m.SementinhaModel(id=9, data_nascimento=date(2021, 1, 1),
+                              turma=m.TurmaSementinha(nome='Sementinha'), **BASE, **RESPONSAVEL)),
         'crisma_menor': (
             'crisma', services.gerar_ficha_crisma_menor,
             m.CrismaModel(id=2, data_nascimento=date(2011, 1, 1),
@@ -82,7 +86,9 @@ class VerificacaoSecretariaTest(TestCase):
     def test_campo_em_todas_as_paginas_de_todas_as_fichas(self):
         for nome, (modulo, gerador, ficha) in fichas().items():
             with self.subTest(ficha=nome):
-                self.assertEqual(self._paginas_com_verificacao(modulo, gerador, ficha), [1, 2, 3])
+                # A Crisma tem uma 4ª página: a declaração sobre o padrinho/madrinha.
+                paginas = [1, 2, 3, 4] if nome.startswith('crisma') else [1, 2, 3]
+                self.assertEqual(self._paginas_com_verificacao(modulo, gerador, ficha), paginas)
 
     def test_texto_do_campo(self):
         canvas = mock.Mock()

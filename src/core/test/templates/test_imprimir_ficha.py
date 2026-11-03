@@ -7,7 +7,7 @@ from datetime import date
 import os
 import tempfile
 
-from core.models import CatequeseInfantilModel, TurmaCatequeseInfantil
+from core.models import CatequeseInfantilModel, TurmaCatequeseInfantil, SementinhaModel, TurmaSementinha
 from core.test.acessos import GRUPO_SECRETARIA, logar
 
 
@@ -88,3 +88,52 @@ class ImprimirFichaPostTest(TestCase):
 
         # --- Verificar se gerar_ficha_catequese foi chamado uma vez ---
         mock_pdf.assert_called_once_with(self.ficha)
+
+
+class ImprimirFichaSementinhaPostTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        logar(self.client, 'secretaria', GRUPO_SECRETARIA)
+        turma = TurmaSementinha.objects.create(nome="Sementinha - Sábado às 9:00h")
+        self.ficha = SementinhaModel.objects.create(
+            nome='Ana Souza', sexo='F', data_nascimento=date(2021, 6, 1),
+            endereco='Rua das Flores, 123', cidade='Araras', uf='SP', turma=turma,
+            nome_responsavel='Maria da Silva', cpf_responsavel='123.456.789-00',
+            endereco_responsavel='Rua das Flores, 123',
+        )
+
+    def test_get_redireciona_para_listagem(self):
+        resp = self.client.get(r("core:imprimir_ficha_sementinha"))
+        self.assertRedirects(resp, r("core:listar_fichas"), fetch_redirect_response=False)
+
+    @patch("core.views.gerar_ficha_sementinha")
+    def test_post_marca_como_impressa(self, mock_pdf):
+        tmp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp_dir.cleanup)
+        pdf_path = os.path.join(tmp_dir.name, "ficha_teste.pdf")
+        with open(pdf_path, "wb") as f:
+            f.write(b"PDF TESTE")
+        mock_pdf.return_value = pdf_path
+
+        resp = self.client.post(r("core:imprimir_ficha_sementinha"), {"ficha_id": self.ficha.id})
+        self.addCleanup(resp.close)
+
+        self.assertIsInstance(resp, FileResponse)
+        self.ficha.refresh_from_db()
+        self.assertTrue(self.ficha.ficha_impressa)
+        mock_pdf.assert_called_once_with(self.ficha)
+
+    def test_assinar_marca_como_assinada(self):
+        resp = self.client.post(r("core:assinar_ficha_sementinha"), {"ficha_id": self.ficha.id})
+        self.assertRedirects(resp, r("core:listar_fichas"), fetch_redirect_response=False)
+        self.ficha.refresh_from_db()
+        self.assertTrue(self.ficha.ficha_assinada)
+
+    def test_remover_apaga_ficha(self):
+        resp = self.client.post(r("core:remover_ficha_sementinha"), {"ficha_id": self.ficha.id})
+        self.assertRedirects(resp, r("core:listar_fichas"), fetch_redirect_response=False)
+        self.assertFalse(SementinhaModel.objects.filter(id=self.ficha.id).exists())
+
+    def test_ficha_inexistente_retorna_404(self):
+        resp = self.client.post(r("core:imprimir_ficha_sementinha"), {"ficha_id": 9999})
+        self.assertEqual(resp.status_code, 404)

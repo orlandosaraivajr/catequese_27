@@ -1,11 +1,12 @@
 import os
 import tempfile
+from unittest import mock
 from datetime import date
 
 from django.test import TestCase, override_settings
 
-from core.models import CatequeseInfantilModel, TurmaCatequeseInfantil
-from core.services import gerar_ficha_catequese
+from core.models import CatequeseInfantilModel, TurmaCatequeseInfantil, SementinhaModel, TurmaSementinha
+from core.services import gerar_ficha_catequese, gerar_ficha_sementinha
 
 
 class GerarFichaMediaRootTest(TestCase):
@@ -33,3 +34,35 @@ class GerarFichaMediaRootTest(TestCase):
         self.assertEqual(os.path.dirname(caminho), self.media_root)
         with open(caminho, 'rb') as f:
             self.assertEqual(f.read(4), b'%PDF')
+
+
+class GerarFichaSementinhaTest(TestCase):
+    """A ficha da Sementinha usa o layout da Catequese Infantil, com título e arquivo próprios."""
+
+    def setUp(self):
+        tmp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp_dir.cleanup)
+        self.media_root = tmp_dir.name
+
+        turma = TurmaSementinha.objects.create(nome="Sementinha - Sábado às 9:00h")
+        self.ficha = SementinhaModel.objects.create(
+            nome='Ana Souza', sexo='F', data_nascimento=date(2021, 6, 1),
+            endereco='Rua das Flores, 123', cidade='Rio Claro', uf='SP', turma=turma,
+            nome_responsavel='Maria da Silva', cpf_responsavel='123.456.789-00',
+            endereco_responsavel='Rua das Flores, 123',
+        )
+
+    def test_gera_pdf_com_nome_proprio(self):
+        with override_settings(MEDIA_ROOT=self.media_root):
+            caminho = gerar_ficha_sementinha(self.ficha)
+        self.assertEqual(os.path.basename(caminho), f'ficha_sementinha_{self.ficha.id}.pdf')
+        with open(caminho, 'rb') as f:
+            self.assertEqual(f.read(4), b'%PDF')
+
+    def test_titulo_da_ficha(self):
+        with mock.patch('reportlab.pdfgen.canvas.Canvas.drawString') as draw, \
+             override_settings(MEDIA_ROOT=self.media_root):
+            gerar_ficha_sementinha(self.ficha)
+        textos = [chamada.args[2] for chamada in draw.call_args_list]
+        self.assertIn('INSCRIÇÃO PARA SEMENTINHA', textos)
+        self.assertNotIn('INSCRIÇÃO PARA CATEQUESE INFANTIL', textos)

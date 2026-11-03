@@ -13,13 +13,13 @@ from ._common import (
 )
 
 
-def gerar_ficha_catequese(ficha):
+def gerar_ficha_catequese(ficha, titulo="INSCRIÇÃO PARA CATEQUESE INFANTIL", prefixo="ficha_catequese"):
     img_path = CABECALHO_PATH
-    c, height, filename = novo_canvas(f"ficha_catequese_{ficha.id}.pdf")
+    c, height, filename = novo_canvas(f"{prefixo}_{ficha.id}.pdf")
 
     desenhar_cabecalho(c, img_path, height, y=200)
     c.setFont("Helvetica", 16)
-    c.drawString(130, height - 220, f"INSCRIÇÃO PARA CATEQUESE INFANTIL")
+    c.drawString(130, height - 220, titulo)
     
     # Nome
     c.setFont("Helvetica-Bold", 11)
@@ -217,3 +217,10 @@ def gerar_ficha_catequese(ficha):
     c.save()
 
     return filename
+
+
+def gerar_ficha_sementinha(ficha):
+    """A Sementinha tem os mesmos dados da Catequese Infantil; muda só o título."""
+    return gerar_ficha_catequese(
+        ficha, titulo="INSCRIÇÃO PARA SEMENTINHA", prefixo="ficha_sementinha",
+    )

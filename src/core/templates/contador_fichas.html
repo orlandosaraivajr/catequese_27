@@ -19,6 +19,10 @@
         {% include "_tabela_totais.html" %}
     {% endwith %}
 
+    {% with totais=total_sementinha cor="lima" titulo="Sementinha" %}
+        {% include "_tabela_totais.html" %}
+    {% endwith %}
+
     {% with totais=total_crisma cor="laranja" titulo="Crisma" %}
         {% include "_tabela_totais.html" %}
     {% endwith %}
