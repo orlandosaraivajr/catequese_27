@@ -969,6 +969,54 @@ class TurmaPerseveranca_MEJForm(TurmaForm):
         }
 
 
+class AjustePastoralForm(forms.Form):
+    """Transferência de ficha entre pastorais: turma no destino e, se preciso, o responsável.
+
+    A coordenação pode escolher qualquer turma do destino (inclusive inativa ou
+    lotada): é um ajuste de cadastro, não uma inscrição nova.
+    """
+
+    CAMPOS_RESPONSAVEL = (
+        ('nome_responsavel', 'Nome do Responsável:', 'Informe o nome do responsável.'),
+        ('cpf_responsavel', 'CPF do Responsável:', 'Informe o CPF do responsável.'),
+        ('endereco_responsavel', 'Endereço do Responsável:', 'Informe o endereço do responsável.'),
+    )
+
+    def __init__(self, *args, turma_model, ficha, exige_responsavel, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['turma'] = forms.ModelChoiceField(
+            queryset=turma_model.objects.all(),
+            label='Turma no destino:',
+            help_text='Faixa de nascimento e limite de vagas não são verificados no ajuste.',
+            widget=forms.Select(attrs={'class': 'form-select'}),
+            error_messages={'required': 'Selecione a turma de destino.'},
+        )
+        self.fields['turma'].label_from_instance = (
+            lambda turma: turma.nome if turma.ativa else f"{turma.nome} (inativa)"
+        )
+        if exige_responsavel:
+            for nome, label, obrigatorio in self.CAMPOS_RESPONSAVEL:
+                self.fields[nome] = forms.CharField(
+                    label=label,
+                    max_length=255 if nome == 'endereco_responsavel' else 150,
+                    initial=getattr(ficha, nome, '') or '',
+                    widget=forms.TextInput(attrs={'class': 'form-control'}),
+                    error_messages={'required': obrigatorio},
+                )
+
+    def clean_nome_responsavel(self):
+        nome = self.cleaned_data.get('nome_responsavel', '').strip()
+        if len(nome.split()) < 2:
+            raise forms.ValidationError("Erro: Digite o nome completo do responsável.")
+        return nome
+
+    def clean_cpf_responsavel(self):
+        cpf = self.cleaned_data.get('cpf_responsavel', '').strip()
+        if len(cpf) > 14:
+            raise forms.ValidationError("CPF inválido.")
+        return cpf
+
+
 class CoordenacaoLoginForm(AuthenticationForm):
     """Login da área restrita: somente usuários da secretaria ou da coordenação podem entrar."""
 

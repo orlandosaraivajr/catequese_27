@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block titulo %}Coordenação &middot; Ajuste entre pastorais{% endblock %}
+
+{% block conteudo %}
+<div class="container py-4">
+    {% include "_banner.html" with cor="laranja" icone="swap_horiz" titulo="Ajuste entre pastorais" subtitulo="Coordenação · Transferência de fichas entre pastorais" %}
+
+    <p class="text-muted">
+        Escolha a pastoral em que a ficha foi cadastrada, localize a ficha e clique em <strong>Transferir</strong>.
+    </p>
+
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        {% for chave, pastoral in pastorais.items %}
+            <a href="?pastoral={{ chave }}" class="btn btn-sm {% if chave == origem %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                {{ pastoral.titulo }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <form method="GET" class="d-flex flex-wrap gap-2 mb-3">
+        <input type="hidden" name="pastoral" value="{{ origem }}">
+        <input type="search" name="busca" value="{{ busca }}" class="form-control" style="max-width: 360px;"
+               placeholder="Buscar pelo nome" aria-label="Buscar pelo nome">
+        <button type="submit" class="btn btn-outline-primary">
+            <span class="material-symbols-outlined">search</span>Buscar
+        </button>
+    </form>
+
+    <section class="cor-laranja">
+        <div class="gc-topico">
+            <h2>{{ titulo_origem }}</h2>
+            {% if fichas %}<span class="gc-contagem">{{ fichas|length }} ficha{{ fichas|length|pluralize }}</span>{% endif %}
+        </div>
+
+        {% if fichas %}
+        <div class="gc-tabela table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Nascimento</th>
+                        <th>Turma</th>
+                        <th>Status</th>
+                        <th class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ficha in fichas %}
+                    <tr>
+                        <td class="fw-medium">{{ ficha.nome }}</td>
+                        <td>{{ ficha.data_nascimento|date:"d/m/Y" }}</td>
+                        <td>{{ ficha.turma.nome }}</td>
+                        <td>
+                            {% if ficha.ficha_assinada %}
+                                <span class="gc-chip gc-chip-verde"><span class="material-symbols-outlined">task_alt</span>Assinada</span>
+                            {% elif ficha.ficha_impressa %}
+                                <span class="gc-chip gc-chip-laranja"><span class="material-symbols-outlined">print</span>Impressa</span>
+                            {% else %}
+                                <span class="gc-chip gc-chip-cinza"><span class="material-symbols-outlined">schedule</span>Pendente</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="gc-acoes">
+                                <a href="{% url 'core:transferir_ficha_pastoral' origem ficha.id %}" class="btn btn-texto btn-sm">
+                                    <span class="material-symbols-outlined">swap_horiz</span>Transferir
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="gc-vazio">
+            <span class="material-symbols-outlined">inbox</span>
+            {% if busca %}Nenhuma ficha de {{ titulo_origem }} encontrada para "{{ busca }}".{% else %}Nenhuma ficha de {{ titulo_origem }} cadastrada.{% endif %}
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

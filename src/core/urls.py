@@ -48,6 +48,12 @@ urlpatterns = [
     # Exportar Excel
     path('total', views.total, name='total'),
     path('excel', views.exportar_excel, name='exportar-excel'),
+    path('excel-casamento', views.exportar_excel_casamento, name='exportar-excel-casamento'),
+    path('excel-coroinhas', views.exportar_excel_coroinhas, name='exportar-excel-coroinhas'),
+    # Ajuste entre pastorais (coordenação)
+    path('coordenacao/ajuste-pastorais', views.ajuste_pastorais, name='ajuste_pastorais'),
+    path('coordenacao/ajuste-pastorais/<str:origem>/<int:ficha_id>', views.transferir_ficha_pastoral, name='transferir_ficha_pastoral'),
+    path('coordenacao/ajuste-pastorais/<str:origem>/<int:ficha_id>/<str:destino>', views.transferir_ficha_pastoral, name='transferir_ficha_pastoral_destino'),
     # Login / logout da coordenação
     path('coordenacao', views.CoordenacaoLoginView.as_view(), name='coordenacao'),
     path('coordenacao/sair', views.coordenacao_logout, name='coordenacao_logout'),

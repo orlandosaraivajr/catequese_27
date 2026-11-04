@@ -20,7 +20,7 @@ from .perseveranca_mej import (
 from .catequese_adulto import gerar_ficha_catequese_adulto
 from .noivos import gerar_ficha_noivos
 from .coroinhas import gerar_ficha_coroinhas
-from .excel import gerar_Workbook
+from .excel import gerar_Workbook, gerar_Workbook_casamento, gerar_Workbook_coroinhas
 
 __all__ = [
     "data_hoje",
@@ -36,4 +36,6 @@ __all__ = [
     "gerar_ficha_noivos",
     "gerar_ficha_coroinhas",
     "gerar_Workbook",
+    "gerar_Workbook_casamento",
+    "gerar_Workbook_coroinhas",
 ]

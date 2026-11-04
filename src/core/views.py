@@ -1,15 +1,16 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, resolve_url
 from django.contrib.auth import logout
 from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from django.utils.timezone import localtime
-from django.http import HttpResponse, FileResponse
+from django.http import HttpResponse, FileResponse, Http404
 from django.db.models import Count
-from .forms import CatequeseInfantilForm, SementinhaForm, CrismaForm, PerseverancaMejForm, CatequeseAdultoForm, NoivoForm, CoroinhaForm, TurmaForm, TurmaSementinhaForm, TurmaCrismaForm, TurmaCatequeseAdultoForm, TurmaPerseveranca_MEJForm, CoordenacaoLoginForm
+from .forms import CatequeseInfantilForm, SementinhaForm, CrismaForm, PerseverancaMejForm, CatequeseAdultoForm, NoivoForm, CoroinhaForm, TurmaForm, TurmaSementinhaForm, TurmaCrismaForm, TurmaCatequeseAdultoForm, TurmaPerseveranca_MEJForm, AjustePastoralForm, CoordenacaoLoginForm
 from .models import CatequeseInfantilModel, SementinhaModel, CrismaModel, Perseveranca_MEJ_Model, CatequeseAdultoModel, NoivoModel, CoroinhaModel, TurmaCatequeseInfantil, TurmaSementinha, TurmaCrisma, TurmaCatequeseAdulto, TurmaPerseveranca_MEJ
 from .services import gerar_ficha_catequese, gerar_ficha_sementinha, gerar_ficha_crisma, gerar_ficha_perseveranca_mej
 from .acessos import coordenacao_required, secretaria_required, tem_acesso, pagina_inicial
-from .services import gerar_ficha_catequese_adulto, gerar_ficha_noivos ,  gerar_Workbook, gerar_ficha_coroinhas
+from .services import gerar_ficha_catequese_adulto, gerar_ficha_noivos ,  gerar_Workbook, gerar_Workbook_casamento, gerar_Workbook_coroinhas, gerar_ficha_coroinhas
+from .services.ajuste_pastorais import PASTORAIS_AJUSTE, CAMPOS_RESPONSAVEL, campos_perdidos, transferir_ficha
 
 
 def index(request):
@@ -412,6 +413,28 @@ def exportar_excel(request):
     wb.save(response)
     return response
 
+@coordenacao_required
+def exportar_excel_casamento(request):
+    wb = gerar_Workbook_casamento()
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    file_name = 'relatorio_casamento_' + localtime().strftime('%d_%m_%Y__%Hh_%Mm')
+    response['Content-Disposition'] = 'attachment; filename=' + file_name + '.xlsx'
+    wb.save(response)
+    return response
+
+@coordenacao_required
+def exportar_excel_coroinhas(request):
+    wb = gerar_Workbook_coroinhas()
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    file_name = 'relatorio_coroinhas_' + localtime().strftime('%d_%m_%Y__%Hh_%Mm')
+    response['Content-Disposition'] = 'attachment; filename=' + file_name + '.xlsx'
+    wb.save(response)
+    return response
+
 
 # ---------------------------------------------------------------------------
 # Login / logout da área restrita (secretaria e coordenação)
@@ -648,3 +671,68 @@ def editar_turma_perseveranca_mej(request, turma_id):
 @coordenacao_required
 def alternar_turma_perseveranca_mej_ativa(request, turma_id):
     return _alternar_turma_ativa(request, TURMAS_PERSEVERANCA_MEJ, turma_id)
+
+
+# ---------------------------------------------------------------------------
+# Ajuste entre pastorais -- a coordenação transfere uma ficha feita no
+# formulário errado (ex.: Crisma -> Sementinha)
+# ---------------------------------------------------------------------------
+
+@coordenacao_required
+def ajuste_pastorais(request):
+    origem = request.GET.get('pastoral', 'crisma')
+    if origem not in PASTORAIS_AJUSTE:
+        origem = 'crisma'
+    busca = request.GET.get('busca', '').strip()
+    fichas = PASTORAIS_AJUSTE[origem]['modelo'].objects.select_related('turma').order_by('nome')
+    if busca:
+        fichas = fichas.filter(nome__icontains=busca)
+    contexto = {
+        'pastorais': PASTORAIS_AJUSTE,
+        'origem': origem,
+        'titulo_origem': PASTORAIS_AJUSTE[origem]['titulo'],
+        'busca': busca,
+        'fichas': fichas,
+    }
+    return render(request, 'ajuste_pastorais.html', contexto)
+
+
+@coordenacao_required
+def transferir_ficha_pastoral(request, origem, ficha_id, destino=None):
+    if origem not in PASTORAIS_AJUSTE:
+        raise Http404
+    ficha = get_object_or_404(PASTORAIS_AJUSTE[origem]['modelo'], id=ficha_id)
+    destinos = {chave: p for chave, p in PASTORAIS_AJUSTE.items() if chave != origem}
+    contexto = {
+        'ficha': ficha,
+        'origem': origem,
+        'titulo_origem': PASTORAIS_AJUSTE[origem]['titulo'],
+        'destinos': destinos,
+        'destino': destino,
+    }
+    if destino is None:
+        return render(request, 'ajuste_pastoral_transferir.html', contexto)
+    if destino not in destinos:
+        raise Http404
+
+    config = destinos[destino]
+    kwargs = dict(turma_model=config['turma'], ficha=ficha, exige_responsavel=config['exige_responsavel'])
+    if request.method == 'POST':
+        form = AjustePastoralForm(request.POST, **kwargs)
+        if form.is_valid():
+            dados = {nome: form.cleaned_data[nome] for nome in CAMPOS_RESPONSAVEL if nome in form.cleaned_data}
+            nova = transferir_ficha(ficha, config['modelo'], form.cleaned_data['turma'], **dados)
+            messages.success(
+                request,
+                f"Ficha de {nova.nome} transferida de {contexto['titulo_origem']} para {config['titulo']}.",
+            )
+            return redirect(f"{resolve_url('core:ajuste_pastorais')}?pastoral={destino}")
+    else:
+        form = AjustePastoralForm(**kwargs)
+
+    contexto.update(
+        form=form,
+        titulo_destino=config['titulo'],
+        perdidos=campos_perdidos(ficha, config['modelo']),
+    )
+    return render(request, 'ajuste_pastoral_transferir.html', contexto)

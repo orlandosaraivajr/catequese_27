@@ -539,8 +539,17 @@
             <a class="gc-menu-item {% if rota == 'total' %}ativo{% endif %}" href="{% url 'core:total' %}">
                 <span class="material-symbols-outlined">bar_chart</span> Total de Inscrições
             </a>
+            <a class="gc-menu-item {% if rota == 'ajuste_pastorais' or rota == 'transferir_ficha_pastoral' or rota == 'transferir_ficha_pastoral_destino' %}ativo{% endif %}" href="{% url 'core:ajuste_pastorais' %}">
+                <span class="material-symbols-outlined">swap_horiz</span> Ajuste entre pastorais
+            </a>
             <a class="gc-menu-item" href="{% url 'core:exportar-excel' %}">
                 <span class="material-symbols-outlined">download</span> Relatório
+            </a>
+            <a class="gc-menu-item" href="{% url 'core:exportar-excel-casamento' %}">
+                <span class="material-symbols-outlined">download</span> Relatório Casamento
+            </a>
+            <a class="gc-menu-item" href="{% url 'core:exportar-excel-coroinhas' %}">
+                <span class="material-symbols-outlined">download</span> Relatório Coroinha
             </a>
             {% endif %}
             {% if perms.core.acessar_secretaria or perms.core.acessar_coordenacao %}
