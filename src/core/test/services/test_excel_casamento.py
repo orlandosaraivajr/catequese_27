@@ -78,9 +78,11 @@ class ExportarExcelCasamentoViewTest(TestCase):
         ws = openpyxl.load_workbook(BytesIO(resp.content))['Casamento']
         self.assertEqual(ws['A2'].value, 'João Pereira')
 
-    def test_secretaria_recebe_acesso_negado(self):
+    def test_secretaria_baixa_planilha(self):
         logar(self.client, 'secretaria', GRUPO_SECRETARIA)
-        self.assertEqual(self.client.get(r('core:exportar-excel-casamento')).status_code, HTTPStatus.FORBIDDEN)
+        resp = self.client.get(r('core:exportar-excel-casamento'))
+        self.assertEqual(resp.status_code, HTTPStatus.OK)
+        self.assertIn('attachment; filename=relatorio_casamento_', resp['Content-Disposition'])
 
     def test_visitante_vai_para_o_login(self):
         url = r('core:exportar-excel-casamento')
@@ -99,7 +101,9 @@ class MenuRelatorioCasamentoTest(TestCase):
         self.assertLess(casamento, coroinha)
         self.assertIn('Relatório Casamento', html)
 
-    def test_secretaria_e_visitante_nao_veem_o_item(self):
+    def test_visitante_nao_ve_o_item(self):
         self.assertNotContains(self.client.get(r('core:index')), r('core:exportar-excel-casamento'))
+
+    def test_secretaria_ve_o_item(self):
         logar(self.client, 'secretaria', GRUPO_SECRETARIA)
-        self.assertNotContains(self.client.get(r('core:index')), r('core:exportar-excel-casamento'))
+        self.assertContains(self.client.get(r('core:index')), f'href="{r("core:exportar-excel-casamento")}"')

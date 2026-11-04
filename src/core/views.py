@@ -402,7 +402,7 @@ def total(request):
     }
     return render(request, 'contador_fichas.html', contexto)
 
-@coordenacao_required
+@secretaria_required
 def exportar_excel(request):
     wb = gerar_Workbook()
     response = HttpResponse(
@@ -413,7 +413,7 @@ def exportar_excel(request):
     wb.save(response)
     return response
 
-@coordenacao_required
+@secretaria_required
 def exportar_excel_casamento(request):
     wb = gerar_Workbook_casamento()
     response = HttpResponse(
@@ -424,7 +424,7 @@ def exportar_excel_casamento(request):
     wb.save(response)
     return response
 
-@coordenacao_required
+@secretaria_required
 def exportar_excel_coroinhas(request):
     wb = gerar_Workbook_coroinhas()
     response = HttpResponse(

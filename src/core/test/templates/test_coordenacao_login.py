@@ -172,7 +172,7 @@ class DashboardAreaUsuarioTest(TestCase):
 
 
 class MenuRelatorioVisibilidadeTest(TestCase):
-    """O link "Relatório" só aparece no menu para a coordenação (staff)."""
+    """O link "Relatório" não aparece para visitante nem para usuário sem grupo."""
 
     def test_anonimo_nao_ve_link_do_relatorio(self):
         resp = Client().get(r('core:index'))

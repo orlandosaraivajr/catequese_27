@@ -542,6 +542,12 @@
             <a class="gc-menu-item {% if rota == 'ajuste_pastorais' or rota == 'transferir_ficha_pastoral' or rota == 'transferir_ficha_pastoral_destino' %}ativo{% endif %}" href="{% url 'core:ajuste_pastorais' %}">
                 <span class="material-symbols-outlined">swap_horiz</span> Ajuste entre pastorais
             </a>
+            {% endif %}
+            {% if perms.core.acessar_secretaria %}
+            {% if not perms.core.acessar_coordenacao %}
+            <hr>
+            <div class="gc-menu-secao">Relatórios</div>
+            {% endif %}
             <a class="gc-menu-item" href="{% url 'core:exportar-excel' %}">
                 <span class="material-symbols-outlined">download</span> Relatório
             </a>

@@ -11,12 +11,15 @@ from core.test.acessos import GRUPO_COORDENACAO, GRUPO_SECRETARIA, criar_usuario
 PASTORAIS = ('', '_sementinha', '_crisma', '_perseveranca_mej', '_adulto', '_noivos', '_coroinhas')
 
 # Telas da secretaria (GET)
-ROTAS_SECRETARIA = ('core:secretaria', 'core:listar_fichas', 'core:listar_todas_fichas')
+TELAS_SECRETARIA = ('core:secretaria', 'core:listar_fichas', 'core:listar_todas_fichas')
+# Relatórios (download), liberados para a secretaria
+RELATORIOS = ('core:exportar-excel', 'core:exportar-excel-casamento', 'core:exportar-excel-coroinhas')
+ROTAS_SECRETARIA = TELAS_SECRETARIA + RELATORIOS
 # Ações da secretaria sobre as fichas (POST)
 ACOES_SECRETARIA = tuple(f'core:{acao}_ficha{p}' for acao in ('imprimir', 'assinar', 'remover') for p in PASTORAIS)
 # Telas exclusivas da coordenação (GET)
 ROTAS_COORDENACAO = (
-    'core:exportar-excel', 'core:exportar-excel-casamento', 'core:exportar-excel-coroinhas', 'core:total', 'core:ajuste_pastorais',
+    'core:total', 'core:ajuste_pastorais',
     'core:dashboard_turmas_catequese', 'core:dashboard_turmas_sementinha', 'core:dashboard_turmas_crisma',
     'core:dashboard_turmas_catequese_adulto', 'core:dashboard_turmas_perseveranca_mej',
 )
@@ -98,7 +101,7 @@ class SecretariaTest(TestCase):
         logar(self.client, 'secretaria', GRUPO_SECRETARIA)
 
     def test_acessa_telas_da_secretaria(self):
-        for rota in ROTAS_SECRETARIA:
+        for rota in TELAS_SECRETARIA:
             with self.subTest(rota=rota):
                 resp = self.client.get(r(rota))
                 self.assertEqual(resp.status_code, HTTPStatus.OK)
@@ -125,8 +128,27 @@ class SecretariaTest(TestCase):
         resp = self.client.get(r('core:index'))
         self.assertContains(resp, f'href="{r("core:secretaria")}"')
         self.assertNotContains(resp, f'href="{r("core:dashboard_turmas_catequese")}"')
-        self.assertNotContains(resp, f'href="{r("core:exportar-excel")}"')
+        self.assertNotContains(resp, f'href="{r("core:total")}"')
+        self.assertNotContains(resp, f'href="{r("core:ajuste_pastorais")}"')
         self.assertContains(resp, f'action="{r("core:coordenacao_logout")}"')
+
+    def test_menu_mostra_relatorios(self):
+        html = self.client.get(r('core:index')).content.decode()
+        self.assertIn('<div class="gc-menu-secao">Relatórios</div>', html)
+        posicoes = [html.index(f'href="{r(rota)}"') for rota in (
+            'core:secretaria', 'core:exportar-excel', 'core:exportar-excel-casamento', 'core:exportar-excel-coroinhas',
+        )]
+        self.assertEqual(posicoes, sorted(posicoes))
+        self.assertLess(posicoes[-1], html.index(f'action="{r("core:coordenacao_logout")}"'))
+
+    def test_baixa_os_relatorios(self):
+        for rota, arquivo in (('core:exportar-excel', 'relatorio_catequese_'),
+                              ('core:exportar-excel-casamento', 'relatorio_casamento_'),
+                              ('core:exportar-excel-coroinhas', 'relatorio_coroinhas_')):
+            with self.subTest(rota=rota):
+                resp = self.client.get(r(rota))
+                self.assertEqual(resp.status_code, HTTPStatus.OK)
+                self.assertIn(f'attachment; filename={arquivo}', resp['Content-Disposition'])
 
 
 class CoordenacaoTest(TestCase):
