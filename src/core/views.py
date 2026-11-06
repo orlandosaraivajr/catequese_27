@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404, resolve_url
 from django.contrib.auth import logout
 from django.contrib.auth.views import LoginView
+from django.views.csrf import csrf_failure
 from django.contrib import messages
 from django.utils.timezone import localtime
 from django.http import HttpResponse, FileResponse, Http404
@@ -454,6 +455,16 @@ class CoordenacaoLoginView(LoginView):
     def get_default_redirect_url(self):
         # Sem ?next=, a coordenação vai para as turmas e a secretaria para as fichas.
         return pagina_inicial(self.request.user)
+
+
+def csrf_falhou(request, reason=''):
+    # Formulário de login aberto antes de outro login no mesmo navegador (outra aba,
+    # recarga automática da secretaria) tem token vencido. Basta abrir a tela de novo:
+    # quem já está logado segue para a sua página inicial.
+    if request.path == resolve_url('core:coordenacao'):
+        messages.warning(request, 'A página de login estava desatualizada. Se necessário, entre novamente.')
+        return redirect(request.get_full_path())
+    return csrf_failure(request, reason=reason)
 
 
 def coordenacao_logout(request):

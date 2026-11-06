@@ -1,8 +1,10 @@
+import re
+
 from django.contrib.auth import get_user_model, SESSION_KEY
 from django.test import TestCase, Client
 from django.shortcuts import resolve_url as r
 from http import HTTPStatus
-from core.test.acessos import GRUPO_COORDENACAO, criar_usuario
+from core.test.acessos import GRUPO_COORDENACAO, GRUPO_SECRETARIA, criar_usuario
 
 User = get_user_model()
 
@@ -184,3 +186,44 @@ class MenuRelatorioVisibilidadeTest(TestCase):
         client.login(username='comum', password='senha12345')
         resp = client.get(r('core:index'))
         self.assertNotContains(resp, f'href="{r("core:exportar-excel")}"')
+
+
+class LoginComTokenVencidoTest(TestCase):
+    """Formulário de login aberto antes de outro login não mostra a página de erro de CSRF."""
+
+    def setUp(self):
+        criar_usuario('secretaria', GRUPO_SECRETARIA)
+        self.client = Client(enforce_csrf_checks=True)
+        self.url = r('core:coordenacao')
+        self.dados = {'username': 'secretaria', 'password': 'senha12345'}
+        self.token_antigo = self._token(self.client.get(self.url))
+        self.client.post(self.url, {**self.dados, 'csrfmiddlewaretoken': self._token(self.client.get(self.url))})
+
+    def _token(self, resp):
+        return re.search(r'name="csrfmiddlewaretoken" value="([^"]+)"', resp.content.decode()).group(1)
+
+    def test_logado_segue_para_a_pagina_inicial(self):
+        resp = self.client.post(self.url, {**self.dados, 'csrfmiddlewaretoken': self.token_antigo}, follow=True)
+        self.assertRedirects(resp, r('core:listar_fichas'))
+        self.assertContains(resp, 'A página de login estava desatualizada.')
+
+    def test_deslogado_volta_ao_login_e_consegue_entrar(self):
+        self.client.post(r('core:coordenacao_logout'),
+                         {'csrfmiddlewaretoken': self._token(self.client.get(r('core:listar_fichas')))})
+        resp = self.client.post(self.url, {**self.dados, 'csrfmiddlewaretoken': self.token_antigo}, follow=True)
+        self.assertTemplateUsed(resp, 'coordenacao_login.html')
+        self.assertContains(resp, 'A página de login estava desatualizada.')
+        self.assertNotIn('_auth_user_id', self.client.session)
+        resp = self.client.post(self.url, {**self.dados, 'csrfmiddlewaretoken': self._token(resp)})
+        self.assertRedirects(resp, r('core:listar_fichas'), fetch_redirect_response=False)
+
+    def test_preserva_next(self):
+        self.client.post(r('core:coordenacao_logout'),
+                         {'csrfmiddlewaretoken': self._token(self.client.get(r('core:listar_fichas')))})
+        url = f"{self.url}?next={r('core:listar_todas_fichas')}"
+        resp = self.client.post(url, {**self.dados, 'csrfmiddlewaretoken': self.token_antigo})
+        self.assertRedirects(resp, url, fetch_redirect_response=False)
+
+    def test_outras_telas_continuam_com_403(self):
+        resp = self.client.post(r('core:remover_ficha'), {'ficha_id': 1, 'csrfmiddlewaretoken': self.token_antigo})
+        self.assertEqual(resp.status_code, 403)

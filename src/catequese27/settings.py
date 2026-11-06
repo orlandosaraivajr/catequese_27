@@ -21,6 +21,7 @@ LOGIN_REDIRECT_URL = 'core:dashboard_turmas_catequese'
 
 SESSION_COOKIE_SECURE = True   # W012
 CSRF_COOKIE_SECURE = True      # W016
+CSRF_FAILURE_VIEW = 'core.views.csrf_falhou'
 
 
 
