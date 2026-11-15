@@ -9,6 +9,10 @@ from ._common import (
     estilo_paragrafo,
     data_hoje,
     pagina_autorizacao_imagem_menor,
+    desenhar_texto_em_fluxo,
+    desenhar_assinatura,
+    clausula_revogacao_consentimento,
+    clausula_eca_consentimento,
 )
 
 
@@ -61,71 +65,35 @@ def gerar_ficha_coroinhas(ficha):
     c.drawString(100, height - 160, f"TERMO DE CONSENTIMENTO PARA TRATAMENTO DE DADOS ")
     c.drawString(120, height - 180, f"PESSOAIS SENSÍVEIS DE CRIANÇAS E ADOLESCENTES")
     
-    style = estilo_paragrafo()
-
-    paragrafo = Paragraph(
+    textos = [
         f"Eu, {ficha.nome_responsavel}, CPF {ficha.cpf_responsavel} na qualidade de responsável legal pelo(a) menor "
         f"{ficha.nome}, por meio deste instrumento, <b>manifesto meu consentimento livre, informado e inequívoco para o tratamento dos dados pessoais do(a) referido "
-        "menor</b>, nos seguintes termos, em conformidade com a Lei no 13.709/2018:"
-        ,style
-    )
-    frame = Frame(50, height - 400, 500, 200)
-    frame.addFromList([paragrafo], c)
+        "menor</b>, nos seguintes termos, em conformidade com a Lei no 13.709/2018:",
 
-    paragrafo = Paragraph(
         f"1) Autorizo o tratamento a ser realizado pela PARÓQUIA NOSSA SENHORA APARECIDA, pessoa jurídica "
-        f"de direito privado, inscrita no CNPJ no 44.802.999/0011-30, situada na Rua dois, no 349, Bairro Aparecida,"
-        f"Rio Claro/SP, CEP 13500-270, e e-mail: pnsarc@hotmail.com, doravante denominada CONTROLADORA."
-        ,style
-    )
-    frame = Frame(50, height - 460, 500, 200)
-    frame.addFromList([paragrafo], c)
-    
-    paragrafo = Paragraph(
+        f"de direito privado, inscrita no CNPJ no 44.802.999/0011-30, situada na Rua dois, no 349, Bairro Aparecida, "
+        f"Rio Claro/SP, CEP 13500-270, e e-mail: pnsarc@hotmail.com, doravante denominada CONTROLADORA.",
+
         f"2) Os dados pessoais do(a) menor serão utilizados exclusivamente para:<br/>"
         f"    I) Inscrição e organização da pastoral de Coroinhas;<br/>"
-        f"    II) Permitir contato com pais e/ou responsáveis.<br/>"
-        ,style
-    )
-    frame = Frame(50, height - 520, 500, 200)
-    frame.addFromList([paragrafo], c)
-    
-    paragrafo = Paragraph(
-        f"3) Autorizo o tratamento apenas dos seguintes dados pessoais: nome completo; data de nascimento;"
-        f"naturalidade; documento de identificação (RG, CPF, certidão de nascimento ou equivalente); endereço completo; telefone de contato."
-        f"Não haverá utilização dos dados para fins comerciais, divulgação indevida ou compartilhamento com terceiros estranhos às atividades religiosas."
-        ,style
-    )
-    frame = Frame(50, height - 590, 500, 200)
-    frame.addFromList([paragrafo], c)
-    
+        f"    II) Permitir contato com pais e/ou responsáveis.",
 
-    paragrafo = Paragraph(
-        f"4) Declaro estar ciente de que o armazenamento ocorrerá:"
+        f"3) Autorizo o tratamento apenas dos seguintes dados pessoais: nome completo; data de nascimento; "
+        f"naturalidade; documento de identificação (RG, CPF, certidão de nascimento ou equivalente); endereço completo; telefone de contato. "
+        f"Não haverá utilização dos dados para fins comerciais, divulgação indevida ou compartilhamento com terceiros estranhos às atividades religiosas.",
+
+        f"4) Declaro estar ciente de que o armazenamento ocorrerá:<br/>"
         f"I) Em fichas físicas e/ou sistemas informatizados da Paróquia;<br/>"
         f"II) Que o acesso será restrito a pessoas autorizadas (secretaria, coordenação da catequese, catequistas e o Pároco, quando necessário);<br/>"
-        f"III) Que a CONTROLADORA adotará medidas técnicas e administrativas adequadas para proteger os dados contra acessos não autorizados, perda, divulgação indevida ou qualquer forma de tratamento inadequado.<br/>"
-        ,style
-    )
-    frame = Frame(50, height - 670, 500, 200)
-    frame.addFromList([paragrafo], c)
-    
-    paragrafo = Paragraph(
-        f"5) Os dados serão mantidos enquanto o(a) menor estiver no serviço da pastoral dos coroinhas, pelo prazo máximo de 3 (três) anos sacramentais, respeitando-se a necessidade de registros paroquiais.<br/>"
-        f"6) Estou ciente de que posso, a qualquer momento solicitar acesso aos dados pessoais do(a) menor; solicitar correção de dados incompletos, inexatos ou desatualizados; requerer a eliminação de dados desnecessários, excessivos ou tratados em desconformidade com a lei.<br/>"
-        f"7) Declaro, ainda, estar ciente de que posso revogar este consentimento a qualquer momento, mediante solicitação formal e por escrito à Secretaria Paroquial.<br/>"
-        ,style
-    )
-    frame = Frame(50, height - 780, 500, 200)
-    frame.addFromList([paragrafo], c)
-   
-    paragrafo = Paragraph(
-            f"Rio Claro, {data_hoje()}<br/><br/> _____________________________________________<br/> {ficha.nome_responsavel} - CPF: {ficha.cpf_responsavel}",
-        style
-    )
-    frame = Frame(250, height - 940, 500, 200)
-    frame.addFromList([paragrafo], c)
-    desenhar_verificacao_secretaria(c, height - 940)
+        f"III) Que a CONTROLADORA adotará medidas técnicas e administrativas adequadas para proteger os dados contra acessos não autorizados, perda, divulgação indevida ou qualquer forma de tratamento inadequado.",
+
+        f"5) Os dados serão mantidos enquanto o(a) menor estiver no serviço da pastoral dos coroinhas, pelo prazo máximo de 3 (três) anos sacramentais, respeitando-se a necessidade de registros paroquiais.",
+        f"6) Estou ciente de que posso, a qualquer momento solicitar acesso aos dados pessoais do(a) menor; solicitar correção de dados incompletos, inexatos ou desatualizados; requerer a eliminação de dados desnecessários, excessivos ou tratados em desconformidade com a lei.",
+        clausula_revogacao_consentimento(7),
+        clausula_eca_consentimento(8),
+    ]
+    y = desenhar_texto_em_fluxo(c, textos, height - 190)
+    desenhar_assinatura(c, y, ficha.nome_responsavel, ficha.cpf_responsavel)
 
 
     c.showPage()  # Página 3

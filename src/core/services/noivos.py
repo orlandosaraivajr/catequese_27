@@ -2,6 +2,24 @@ from reportlab.lib import colors
 from reportlab.platypus import Frame, Paragraph
 
 from ._common import CABECALHO_PATH, novo_canvas, desenhar_cabecalho, estilo_paragrafo, data_hoje, desenhar_verificacao_secretaria
+from ._common import pagina_autorizacao_imagem, abertura_autorizacao_imagem_noivos, TITULO_AUTORIZACAO_IMAGEM
+from ._common import desenhar_texto_em_fluxo, clausula_revogacao_consentimento
+
+
+def desenhar_assinaturas_noivos(c, y, ficha):
+    """Local/data e, abaixo, três colunas: noivo, noiva e a conferência da secretaria."""
+    style = estilo_paragrafo()
+    frame = Frame(250, y - 200, 500, 200)
+    frame.addFromList([Paragraph(f"Rio Claro, {data_hoje()}", style)], c)
+
+    y_assinaturas = y - 240
+    frame = Frame(50, y_assinaturas, 170, 200)
+    frame.addFromList([Paragraph(f"_________________________<br/>{ficha.nome_noivo}", style)], c)
+
+    frame = Frame(220, y_assinaturas, 170, 200)
+    frame.addFromList([Paragraph(f"_________________________<br/>{ficha.nome_noiva}", style)], c)
+
+    desenhar_verificacao_secretaria(c, y_assinaturas, linhas_antes=0, x=390, largura=170, tracos=25)
 
 
 def gerar_ficha_noivos(ficha):
@@ -113,128 +131,40 @@ def gerar_ficha_noivos(ficha):
     
 
 
-    paragrafo = Paragraph(
+    textos = [
         f"Nós, {ficha.nome_noivo} e {ficha.nome_noiva}, por meio deste instrumento, <b>manifestamos nosso consentimento livre, informado e inequívoco para o tratamento dos nossos dados pessoais"
-        "</b>, nos seguintes termos, em conformidade com a Lei no 13.709/2018:"
-        ,style
-    )
-    frame = Frame(50, height - 400, 500, 200)
-    frame.addFromList([paragrafo], c)
+        "</b>, nos seguintes termos, em conformidade com a Lei no 13.709/2018:",
 
-    paragrafo = Paragraph(
         f"1) Autorizamos o tratamento a ser realizado pela PARÓQUIA NOSSA SENHORA APARECIDA, pessoa jurídica "
-        f"de direito privado, inscrita no CNPJ no 44.802.999/0011-30, situada na Rua dois, no 349, Bairro Aparecida,"
-        f"Rio Claro/SP, CEP 13500-270, e e-mail: pnsarc@hotmail.com, doravante denominada CONTROLADORA."
-        ,style
-    )
-    frame = Frame(50, height - 460, 500, 200)
-    frame.addFromList([paragrafo], c)
-    
-    paragrafo = Paragraph(
+        f"de direito privado, inscrita no CNPJ no 44.802.999/0011-30, situada na Rua dois, no 349, Bairro Aparecida, "
+        f"Rio Claro/SP, CEP 13500-270, e e-mail: pnsarc@hotmail.com, doravante denominada CONTROLADORA.",
+
         f"2) Nossos dados serão utilizados exclusivamente para:<br/>"
         f"    I) O tratamento dos dados pessoais será realizado especificamente para a inscrição, organização e acompanhamento do Curso de Noivos, a fim de atender às exigências pastorais e administrativas relacionadas à preparação para o matrimônio.;<br/>"
-        f"    II) Declaramos ciência de que não haverá utilização dos dados para fins comerciais, divulgação indevida ou acompanhamento com terceiros estranhos às atividades religiosas.<br/>"
-        ,style
-    )
-    frame = Frame(50, height - 520, 500, 200)
-    frame.addFromList([paragrafo], c)
-    
-    paragrafo = Paragraph(
-        f"3) Autorizo o tratamento apenas dos seguintes dados pessoais: nome completo; data de nascimento;"
-        f"naturalidade; documento de identificação (RG, CPF, certidão de nascimento ou equivalente); endereço completo; telefone de contato."
-        f"Não haverá utilização dos dados para fins comerciais, divulgação indevida ou compartilhamento com terceiros estranhos às atividades religiosas."
-        ,style
-    )
-    frame = Frame(50, height - 610, 500, 200)
-    frame.addFromList([paragrafo], c)
-    
+        f"    II) Declaramos ciência de que não haverá utilização dos dados para fins comerciais, divulgação indevida ou acompanhamento com terceiros estranhos às atividades religiosas.",
 
-    paragrafo = Paragraph(
-        f"4) Declaro estar ciente de que o armazenamento ocorrerá:"
+        f"3) Autorizo o tratamento apenas dos seguintes dados pessoais: nome completo; data de nascimento; "
+        f"naturalidade; documento de identificação (RG, CPF, certidão de nascimento ou equivalente); endereço completo; telefone de contato. "
+        f"Não haverá utilização dos dados para fins comerciais, divulgação indevida ou compartilhamento com terceiros estranhos às atividades religiosas.",
+
+        f"4) Declaro estar ciente de que o armazenamento ocorrerá:<br/>"
         f"I) Em fichas físicas e/ou sistemas informatizados da Paróquia;<br/>"
         f"II) Que o acesso será restrito a pessoas autorizadas (secretaria, coordenação da catequese, catequistas e o Pároco, quando necessário);<br/>"
-        f"III) Que a CONTROLADORA adotará medidas técnicas e administrativas adequadas para proteger os dados contra acessos não autorizados, perda, divulgação indevida ou qualquer forma de tratamento inadequado.<br/>"
-        ,style
+        f"III) Que a CONTROLADORA adotará medidas técnicas e administrativas adequadas para proteger os dados contra acessos não autorizados, perda, divulgação indevida ou qualquer forma de tratamento inadequado.",
+
+        f"5) Os dados serão mantidos enquanto estiver matriculado(a) na Catequese, pelo prazo máximo de 3 (três) anos, quando concluída o curso de noivos, respeitando-se a necessidade de registros paroquiais.",
+        f"6) Estamos cientes de que podemos, a qualquer momento solicitar acesso aos nossos dados pessoais; solicitar correção de dados incompletos, inexatos ou desatualizados; requerer a eliminação de dados desnecessários, excessivos ou tratados em desconformidade com a lei.",
+        clausula_revogacao_consentimento(7, plural=True),
+    ]
+    y = desenhar_texto_em_fluxo(c, textos, height - 190, base=110)
+    desenhar_assinaturas_noivos(c, y, ficha)
+
+    c.showPage()  # Página 3
+
+    y = pagina_autorizacao_imagem(
+        c, img_path, height, TITULO_AUTORIZACAO_IMAGEM, abertura_autorizacao_imagem_noivos(ficha), plural=True,
     )
-    frame = Frame(50, height - 690, 500, 200)
-    frame.addFromList([paragrafo], c)
-    
-    paragrafo = Paragraph(
-        f"5) Os dados serão mantidos enquanto estiver matriculado(a) na Catequese, pelo prazo máximo de 3 (três) anos, quando concluída o curso de noivos, respeitando-se a necessidade de registros paroquiais.<br/>"
-        f"6) Estamos cientes de que podemos, a qualquer momento solicitar acesso aos nossos dados pessoais; solicitar correção de dados incompletos, inexatos ou desatualizados; requerer a eliminação de dados desnecessários, excessivos ou tratados em desconformidade com a lei.<br/>"
-        f"7) Declaramos, ainda, estarmos cientes de que podemos revogar este consentimento a qualquer momento, mediante solicitação formal e por escrito à Secretaria Paroquial.<br/>"
-        ,style
-    )
-    frame = Frame(50, height - 800, 500, 200)
-    frame.addFromList([paragrafo], c)
-   
-    paragrafo = Paragraph(f"Rio Claro, {data_hoje()}",style)
-    frame = Frame(250, height - 940, 500, 200)
-    frame.addFromList([paragrafo], c)
-
-    # Três colunas: noivo, noiva e a conferência da secretaria
-    paragrafo = Paragraph(f"_________________________<br/>{ficha.nome_noivo}", style)
-    frame = Frame(50, height - 980, 170, 200)
-    frame.addFromList([paragrafo], c)
-
-    paragrafo = Paragraph(f"_________________________<br/>{ficha.nome_noiva}", style)
-    frame = Frame(220, height - 980, 170, 200)
-    frame.addFromList([paragrafo], c)
-
-    desenhar_verificacao_secretaria(c, height - 980, linhas_antes=0, x=390, largura=170, tracos=25)
-    
-    c.showPage()  # Página 3 
-    
-    desenhar_cabecalho(c, img_path, height, y=140)
-    c.setFont("Helvetica-Bold", 13)
-    c.drawString(160, height - 160, f"AUTORIZAÇÃO PARA USO DE IMAGEM")
-    
-    style = estilo_paragrafo()
-
-    paragrafo = Paragraph(
-        f"Nós, <b>{ficha.nome_noivo}</b> e <b>{ficha.nome_noiva}</b>,  "
-        f", autorizamos, de forma livre, expressa e informada, a Paróquia Nossa Senhora Aparecida, inscrita "
-        f"no CNPJ sob o nº 44.802.999/0011-30, a utilizar a minha imagem, nome e voz, captados em fotografias e/ou vídeos durante atividades e eventos da paróquia, para fins de divulgação em meios impressos, digitais e redes sociais da paróquia, sem qualquer ônus."
-        ,style
-    )
-    frame = Frame(50, height - 400, 500, 200)
-    frame.addFromList([paragrafo], c)
-
-    paragrafo = Paragraph(
-        f"Declaramos estar cientes de que a utilização da nossa imagem será feita de acordo com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 - LGPD), e que podemos, a qualquer momento, revogar esta autorização mediante solicitação por escrito à paróquia. "
-        ,style
-    )
-    frame = Frame(50, height - 480, 500, 200)
-    frame.addFromList([paragrafo], c)
-
-    paragrafo = Paragraph(
-        f"Estamos cientes de que não temos direito a qualquer remuneração pelo uso da nossa imagem, nome e voz nos termos acima mencionados, e que a presente autorização é concedida por prazo indeterminado, podendo ser revogada a qualquer momento, mediante comunicação por escrito. "
-        ,style
-    )
-    frame = Frame(50, height - 530, 500, 200)
-    frame.addFromList([paragrafo], c)
-    
-    paragrafo = Paragraph(
-        f"Por fim, declaramos que a presente autorização foi feita de forma livre, sem qualquer coação, e que fomos devidamente informados sobre o tratamento dos dados pessoais pela paróquia. "
-        ,style
-    )
-    frame = Frame(50, height - 580, 500, 200)
-    frame.addFromList([paragrafo], c)
-
-    paragrafo = Paragraph(f"Rio Claro, {data_hoje()}",style)
-    frame = Frame(250, height - 630, 500, 200)
-    frame.addFromList([paragrafo], c)
-
-    # Três colunas: noivo, noiva e a conferência da secretaria
-    paragrafo = Paragraph(f"_________________________<br/>{ficha.nome_noivo}", style)
-    frame = Frame(50, height - 670, 170, 200)
-    frame.addFromList([paragrafo], c)
-
-    paragrafo = Paragraph(f"_________________________<br/>{ficha.nome_noiva}", style)
-    frame = Frame(220, height - 670, 170, 200)
-    frame.addFromList([paragrafo], c)
-
-    desenhar_verificacao_secretaria(c, height - 670, linhas_antes=0, x=390, largura=170, tracos=25)
+    desenhar_assinaturas_noivos(c, y, ficha)
 
     
     
