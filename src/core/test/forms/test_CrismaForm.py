@@ -1,4 +1,5 @@
 import datetime
+from unittest import mock
 from django.test import TestCase
 from core.models import CrismaModel, TurmaCrisma
 from core.forms import CrismaForm
@@ -7,6 +8,18 @@ from core.forms import CrismaForm
 def ano_relativo(anos_atras):
     """Ano de nascimento que resulta na idade projetada informada (ano seguinte - ano)."""
     return datetime.date.today().year + 1 - anos_atras
+
+
+# ------------------------------------------------------------------
+# Regras vigentes de CrismaForm.clean_data_nascimento.
+# Se algum teste abaixo falhar, a regra do formulário mudou: confirme se
+# a mudança foi intencional e atualize estas constantes.
+# ------------------------------------------------------------------
+IDADE_MINIMA = 11
+IDADE_MAXIMA = 20
+MSG_OBRIGATORIA = "Informe a data de nascimento."
+MSG_IDADE_MINIMA = "Necessário 11 anos para pré-matrícula na Crisma."
+MSG_IDADE_MAXIMA = "Acima de 20 anos, inscrever-se na Catequese de Adulto."
 
 
 class CrismaFormTurmaTests(TestCase):
@@ -140,3 +153,127 @@ class CrismaFormTurmaTests(TestCase):
     def test_sem_limite_de_vagas_aceita_sempre(self):
         self._inscrever(self.turma_sem_restricao, 5)
         self.assertTrue(self.make_form(turma=self.turma_sem_restricao.id).is_valid())
+
+
+class CrismaFormDataNascimentoTests(TestCase):
+    """
+    Testes de regressão de clean_data_nascimento.
+
+    Usam uma turma sem faixa de nascimento para isolar a regra de idade
+    da validação de turma. Cada teste fixa um aspecto da regra atual
+    (limites, mensagens, forma de cálculo) e falha se ele mudar.
+    """
+
+    def setUp(self):
+        self.turma = TurmaCrisma.objects.create(nome="Sábado às 09h")
+        self.base = {
+            'nome': 'Maria Silva', 'sexo': 'F', 'naturalidade': 'São Paulo',
+            'nome_pai': 'João da Silva', 'nome_mae': 'Ana da Silva',
+            'endereco': 'Rua teste', 'cidade': 'SP', 'uf': 'SP',
+            'celular_pai': '1199999', 'celular_mae': '1199999',
+            'batizado': False, 'primeira_eucaristia': False,
+            'turma': self.turma.id,
+            'possui_deficiencia': False, 'possui_transtorno': False,
+            'medicamento_uso_continuo': False, 'acompanhamento_psicologico': False,
+            'nome_responsavel': 'Maria Souza', 'cpf_responsavel': '00011122233',
+            'endereco_responsavel': 'Rua teste',
+        }
+
+    def form_com_idade(self, idade, mes=6, dia=15):
+        data = dict(self.base, data_nascimento=datetime.date(ano_relativo(idade), mes, dia))
+        return CrismaForm(data=data)
+
+    def erros_data(self, form):
+        form.is_valid()
+        return form.errors.get('data_nascimento', [])
+
+    # ------------------------------------
+    # Obrigatoriedade
+    # ------------------------------------
+    def test_data_ausente_exibe_mensagem_de_obrigatoria(self):
+        form = CrismaForm(data=dict(self.base, data_nascimento=''))
+        self.assertEqual(self.erros_data(form), [MSG_OBRIGATORIA])
+
+    # ------------------------------------
+    # Limite mínimo
+    # ------------------------------------
+    def test_idade_minima_vigente_e_11(self):
+        self.assertEqual(self.erros_data(self.form_com_idade(IDADE_MINIMA)), [],
+                         f"{IDADE_MINIMA} anos deveria ser aceito: o limite mínimo foi elevado?")
+
+    def test_um_ano_abaixo_do_minimo_e_recusado(self):
+        self.assertEqual(self.erros_data(self.form_com_idade(IDADE_MINIMA - 1)), [MSG_IDADE_MINIMA],
+                         f"{IDADE_MINIMA - 1} anos deveria ser recusado: o limite mínimo foi reduzido?")
+
+    def test_limite_antigo_de_15_anos_nao_e_mais_exigido(self):
+        for idade in range(IDADE_MINIMA, 15):
+            with self.subTest(idade=idade):
+                self.assertEqual(self.erros_data(self.form_com_idade(idade)), [])
+
+    def test_mensagem_minima_cita_a_idade_minima(self):
+        self.assertIn(f"{IDADE_MINIMA} anos", MSG_IDADE_MINIMA)
+        self.assertEqual(self.erros_data(self.form_com_idade(IDADE_MINIMA - 1)), [MSG_IDADE_MINIMA])
+
+    # ------------------------------------
+    # Limite máximo
+    # ------------------------------------
+    def test_idade_maxima_vigente_e_20(self):
+        self.assertEqual(self.erros_data(self.form_com_idade(IDADE_MAXIMA)), [],
+                         f"{IDADE_MAXIMA} anos deveria ser aceito: o limite máximo foi reduzido?")
+
+    def test_um_ano_acima_do_maximo_e_recusado(self):
+        self.assertEqual(self.erros_data(self.form_com_idade(IDADE_MAXIMA + 1)), [MSG_IDADE_MAXIMA],
+                         f"{IDADE_MAXIMA + 1} anos deveria ser recusado: o limite máximo foi elevado?")
+
+    # ------------------------------------
+    # Faixa completa
+    # ------------------------------------
+    def test_toda_a_faixa_permitida_e_aceita(self):
+        for idade in range(IDADE_MINIMA, IDADE_MAXIMA + 1):
+            with self.subTest(idade=idade):
+                self.assertEqual(self.erros_data(self.form_com_idade(idade)), [])
+
+    def test_idades_fora_da_faixa_sao_recusadas_com_a_mensagem_certa(self):
+        casos = [(idade, MSG_IDADE_MINIMA) for idade in range(1, IDADE_MINIMA)]
+        casos += [(idade, MSG_IDADE_MAXIMA) for idade in range(IDADE_MAXIMA + 1, IDADE_MAXIMA + 15)]
+        for idade, mensagem in casos:
+            with self.subTest(idade=idade):
+                self.assertEqual(self.erros_data(self.form_com_idade(idade)), [mensagem])
+
+    # ------------------------------------
+    # Forma de cálculo
+    # ------------------------------------
+    def test_calculo_considera_apenas_o_ano_de_nascimento(self):
+        """1º/jan e 31/dez do mesmo ano têm o mesmo resultado (mês e dia são ignorados)."""
+        for idade in (IDADE_MINIMA - 1, IDADE_MINIMA, IDADE_MAXIMA, IDADE_MAXIMA + 1):
+            with self.subTest(idade=idade):
+                self.assertEqual(
+                    self.erros_data(self.form_com_idade(idade, 1, 1)),
+                    self.erros_data(self.form_com_idade(idade, 12, 31)),
+                )
+
+    def test_idade_e_projetada_para_o_ano_seguinte(self):
+        """Com 'hoje' fixado em 14/11/2026, a referência é 2027."""
+
+        class DataFixa(datetime.date):
+            @classmethod
+            def today(cls):
+                return cls(2026, 11, 14)
+
+        casos = [
+            (2016, []),                  # 2027 - 2016 = 11 -> aceito
+            (2017, [MSG_IDADE_MINIMA]),  # 10 -> recusado
+            (2007, []),                  # 20 -> aceito
+            (2006, [MSG_IDADE_MAXIMA]),  # 21 -> recusado
+        ]
+        with mock.patch('core.forms.date', DataFixa):
+            for ano, esperado in casos:
+                with self.subTest(ano=ano):
+                    form = CrismaForm(data=dict(self.base, data_nascimento=datetime.date(ano, 6, 15)))
+                    self.assertEqual(self.erros_data(form), esperado)
+
+    def test_data_valida_e_retornada_sem_alteracao(self):
+        nascimento = datetime.date(ano_relativo(16), 5, 10)
+        form = CrismaForm(data=dict(self.base, data_nascimento=nascimento))
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data['data_nascimento'], nascimento)
