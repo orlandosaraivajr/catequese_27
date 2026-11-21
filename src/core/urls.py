@@ -54,6 +54,8 @@ urlpatterns = [
     path('coordenacao/ajuste-pastorais', views.ajuste_pastorais, name='ajuste_pastorais'),
     path('coordenacao/ajuste-pastorais/<str:origem>/<int:ficha_id>', views.transferir_ficha_pastoral, name='transferir_ficha_pastoral'),
     path('coordenacao/ajuste-pastorais/<str:origem>/<int:ficha_id>/<str:destino>', views.transferir_ficha_pastoral, name='transferir_ficha_pastoral_destino'),
+    # Logs das ações sobre as fichas (coordenação)
+    path('coordenacao/logs', views.logs_fichas, name='logs_fichas'),
     # Login / logout da coordenação
     path('coordenacao', views.CoordenacaoLoginView.as_view(), name='coordenacao'),
     path('coordenacao/sair', views.coordenacao_logout, name='coordenacao_logout'),

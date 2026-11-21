@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block titulo %}Coordenação &middot; Logs{% endblock %}
+
+{% block conteudo %}
+<div class="container py-4">
+    {% include "_banner.html" with cor="roxo" icone="history" titulo="Logs" subtitulo="Coordenação · Histórico de ações sobre as fichas" %}
+
+    <p class="text-muted">
+        Cada pré-cadastro enviado e cada impressão, reimpressão, assinatura, remoção ou transferência
+        de ficha fica registrado aqui, com a data, a hora e quem fez a ação.
+    </p>
+
+    <form method="GET" class="row g-2 align-items-end mb-3">
+        <div class="col-12 col-md-4">
+            <label for="busca" class="form-label small mb-1">Nome da ficha</label>
+            <input type="search" id="busca" name="busca" value="{{ filtros.busca }}" class="form-control" placeholder="Buscar pelo nome">
+        </div>
+        <div class="col-6 col-md-2">
+            <label for="acao" class="form-label small mb-1">Ação</label>
+            <select id="acao" name="acao" class="form-select">
+                <option value="">Todas</option>
+                {% for valor, rotulo in acoes %}
+                <option value="{{ valor }}" {% if valor == filtros.acao %}selected{% endif %}>{{ rotulo }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <label for="pastoral" class="form-label small mb-1">Pastoral</label>
+            <select id="pastoral" name="pastoral" class="form-select">
+                <option value="">Todas</option>
+                {% for valor, rotulo in pastorais %}
+                <option value="{{ valor }}" {% if valor == filtros.pastoral %}selected{% endif %}>{{ rotulo }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12 col-md-4">
+            <label for="usuario" class="form-label small mb-1">Usuário</label>
+            <select id="usuario" name="usuario" class="form-select">
+                <option value="">Todos</option>
+                {% for nome in usuarios %}
+                <option value="{{ nome }}" {% if nome == filtros.usuario %}selected{% endif %}>{{ nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <label for="de" class="form-label small mb-1">De</label>
+            <input type="date" id="de" name="de" value="{{ filtros.de }}" class="form-control">
+        </div>
+        <div class="col-6 col-md-2">
+            <label for="ate" class="form-label small mb-1">Até</label>
+            <input type="date" id="ate" name="ate" value="{{ filtros.ate }}" class="form-control">
+        </div>
+        <div class="col-12 col-md-8 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary">
+                <span class="material-symbols-outlined">filter_alt</span>Filtrar
+            </button>
+            {% if filtrando %}
+            <a href="{% url 'core:logs_fichas' %}" class="btn btn-texto">Limpar filtros</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <section class="cor-roxo">
+        <div class="gc-topico">
+            <h2>Registros</h2>
+            {% if pagina.paginator.count %}<span class="gc-contagem">{{ pagina.paginator.count }} registro{{ pagina.paginator.count|pluralize }}</span>{% endif %}
+        </div>
+
+        {% if pagina.object_list %}
+        <div class="gc-tabela table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Data e hora</th>
+                        <th>Ação</th>
+                        <th>Pastoral</th>
+                        <th>Ficha</th>
+                        <th>Usuário</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in pagina.object_list %}
+                    <tr>
+                        <td class="text-nowrap">{{ log.criado_em|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            {% if log.acao == 'remocao' %}
+                                <span class="gc-chip gc-chip-vermelho"><span class="material-symbols-outlined">delete</span>{{ log.get_acao_display }}</span>
+                            {% elif log.acao == 'assinatura' %}
+                                <span class="gc-chip gc-chip-verde"><span class="material-symbols-outlined">task_alt</span>{{ log.get_acao_display }}</span>
+                            {% elif log.acao == 'impressao' or log.acao == 'reimpressao' %}
+                                <span class="gc-chip gc-chip-laranja"><span class="material-symbols-outlined">print</span>{{ log.get_acao_display }}</span>
+                            {% elif log.acao == 'transferencia' %}
+                                <span class="gc-chip gc-chip-cinza"><span class="material-symbols-outlined">swap_horiz</span>{{ log.get_acao_display }}</span>
+                            {% else %}
+                                <span class="gc-chip gc-chip-cinza"><span class="material-symbols-outlined">edit_note</span>{{ log.get_acao_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ log.get_pastoral_display }}</td>
+                        <td>
+                            <span class="fw-medium">{{ log.nome_ficha }}</span>
+                            <span class="text-muted small">· nº {{ log.ficha_id }}</span>
+                            {% if log.detalhe %}<div class="text-muted small">{{ log.detalhe }}</div>{% endif %}
+                        </td>
+                        <td>
+                            {% if log.usuario_id %}{{ log.usuario_nome }}{% else %}<span class="text-muted">{{ log.usuario_nome }}</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if pagina.has_other_pages %}
+        <nav class="d-flex justify-content-between align-items-center mt-3" aria-label="Paginação dos logs">
+            {% if pagina.has_previous %}
+                <a class="btn btn-outline-primary btn-sm" href="?{% if querystring %}{{ querystring }}&{% endif %}pagina={{ pagina.previous_page_number }}">
+                    <span class="material-symbols-outlined">chevron_left</span>Anterior
+                </a>
+            {% else %}<span></span>{% endif %}
+            <span class="text-muted small">Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+            {% if pagina.has_next %}
+                <a class="btn btn-outline-primary btn-sm" href="?{% if querystring %}{{ querystring }}&{% endif %}pagina={{ pagina.next_page_number }}">
+                    Próxima<span class="material-symbols-outlined">chevron_right</span>
+                </a>
+            {% else %}<span></span>{% endif %}
+        </nav>
+        {% endif %}
+        {% else %}
+        <div class="gc-vazio">
+            <span class="material-symbols-outlined">inbox</span>
+            {% if filtrando %}Nenhum registro encontrado para os filtros escolhidos.{% else %}Nenhuma ação registrada até o momento.{% endif %}
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

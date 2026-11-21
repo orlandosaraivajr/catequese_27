@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -463,16 +464,73 @@ class CoroinhaModel(models.Model):
     celular_mae = models.CharField(max_length=20, default='')
 
     # Termo de uso de Imagem
-    
+
     nome_responsavel = models.CharField(max_length=150)
     cpf_responsavel = models.CharField(max_length=14)
     endereco_responsavel = models.CharField(max_length=255)
-    
+
     # Ficha Impressa
     ficha_impressa = models.BooleanField(default=False)
     ficha_assinada = models.BooleanField(default=False)
 
     criado_em = models.DateTimeField(default=timezone.now)
-    
+
     def __str__(self):
         return self.nome
+
+
+class LogFicha(models.Model):
+    """Histórico das ações sobre as fichas (pré-cadastro, impressão, assinatura...).
+
+    Não usa ForeignKey para a ficha: o log precisa sobreviver à remoção ou à
+    transferência dela. Por isso guarda a pastoral, o id e uma cópia do nome.
+    O nome do usuário também é copiado, para o histórico continuar legível
+    mesmo que o usuário seja apagado.
+    """
+
+    CADASTRO = 'cadastro'
+    IMPRESSAO = 'impressao'
+    REIMPRESSAO = 'reimpressao'
+    ASSINATURA = 'assinatura'
+    REMOCAO = 'remocao'
+    TRANSFERENCIA = 'transferencia'
+    ACOES = [
+        (CADASTRO, 'Pré-cadastro enviado'),
+        (IMPRESSAO, 'Impressão'),
+        (REIMPRESSAO, 'Reimpressão'),
+        (ASSINATURA, 'Marcada como assinada'),
+        (REMOCAO, 'Remoção'),
+        (TRANSFERENCIA, 'Transferência entre pastorais'),
+    ]
+
+    PASTORAIS = [
+        ('catequese_infantil', 'Catequese Infantil'),
+        ('sementinha', 'Sementinha'),
+        ('crisma', 'Crisma'),
+        ('mej', 'MEJ'),
+        ('catequese_adulto', 'Catequese Adulto'),
+        ('noivos', 'Noivos'),
+        ('coroinhas', 'Coroinhas'),
+    ]
+
+    SEM_AUTENTICACAO = 'sem autenticação'
+
+    acao = models.CharField('ação', max_length=20, choices=ACOES)
+    pastoral = models.CharField(max_length=30, choices=PASTORAIS)
+    ficha_id = models.PositiveIntegerField('nº da ficha')
+    nome_ficha = models.CharField('nome', max_length=310)
+    detalhe = models.CharField(max_length=255, blank=True, default='')
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='logs_fichas', verbose_name='usuário',
+    )
+    usuario_nome = models.CharField('usuário', max_length=150, default=SEM_AUTENTICACAO)
+    criado_em = models.DateTimeField('data e hora', auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-criado_em', '-id']
+        verbose_name = 'log de ficha'
+        verbose_name_plural = 'logs de fichas'
+
+    def __str__(self):
+        return f"{self.get_acao_display()} · {self.nome_ficha} · {self.usuario_nome}"

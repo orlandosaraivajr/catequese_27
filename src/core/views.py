@@ -12,80 +12,48 @@ from .services import gerar_ficha_catequese, gerar_ficha_sementinha, gerar_ficha
 from .acessos import coordenacao_required, secretaria_required, tem_acesso, pagina_inicial
 from .services import gerar_ficha_catequese_adulto, gerar_ficha_noivos ,  gerar_Workbook, gerar_Workbook_casamento, gerar_Workbook_coroinhas, gerar_ficha_coroinhas
 from .services.ajuste_pastorais import PASTORAIS_AJUSTE, CAMPOS_RESPONSAVEL, campos_perdidos, transferir_ficha
+from datetime import date
+from django.core.paginator import Paginator
+from django.db import transaction
+from .models import LogFicha
+from .logs import registrar_log
 
 
 def index(request):
     return render(request, 'index.html')
 
-def catequese_infantil(request):
+def _pre_cadastro(request, form_class, template):
+    """Formulário público de pré-cadastro; registra no log o envio da ficha."""
     if request.method == 'POST':
-        form = CatequeseInfantilForm(request.POST)
+        form = form_class(request.POST)
         if form.is_valid():
-            form.save()
+            ficha = form.save()
+            registrar_log(LogFicha.CADASTRO, ficha, request.user)
             return redirect('core:procure_secretaria')
     else:
-        form = CatequeseInfantilForm()
-    return render(request, 'catequese_infantil.html', {'form': form})
+        form = form_class()
+    return render(request, template, {'form': form})
+
+def catequese_infantil(request):
+    return _pre_cadastro(request, CatequeseInfantilForm, 'catequese_infantil.html')
 
 def sementinha(request):
-    if request.method == 'POST':
-        form = SementinhaForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('core:procure_secretaria')
-    else:
-        form = SementinhaForm()
-    return render(request, 'sementinha.html', {'form': form})
+    return _pre_cadastro(request, SementinhaForm, 'sementinha.html')
 
 def crisma(request):
-    if request.method == 'POST':
-        form = CrismaForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('core:procure_secretaria')
-    else:
-        form = CrismaForm()
-    return render(request, 'crisma.html', {'form': form})
+    return _pre_cadastro(request, CrismaForm, 'crisma.html')
 
 def perseveranca_mej(request):
-    if request.method == 'POST':
-        form = PerseverancaMejForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('core:procure_secretaria')
-    else:
-        form = PerseverancaMejForm()
-    return render(request, 'perseveranca.html', {'form': form})
+    return _pre_cadastro(request, PerseverancaMejForm, 'perseveranca.html')
 
 def catequese_adulto(request):
-    if request.method == 'POST':
-        form = CatequeseAdultoForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('core:procure_secretaria')
-    else:
-        form = CatequeseAdultoForm()
-    return render(request, 'catequese_adulto.html', {'form': form})
+    return _pre_cadastro(request, CatequeseAdultoForm, 'catequese_adulto.html')
 
 def noivos(request):
-    if request.method == 'POST':
-        form = NoivoForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('core:procure_secretaria')
-    else:
-        form = NoivoForm()
-    return render(request, 'noivos.html', {'form': form})
+    return _pre_cadastro(request, NoivoForm, 'noivos.html')
 
 def coroinhas(request):
-    if request.method == 'POST':
-        form = CoroinhaForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('core:procure_secretaria')
-    else:
-        form = CoroinhaForm()
-    return render(request, 'coroinhas.html', {'form': form})
+    return _pre_cadastro(request, CoroinhaForm, 'coroinhas.html')
 
 def procure_secretaria(request):
     return render(request, 'procure_secretaria.html')
@@ -124,201 +92,124 @@ def listar_todas_fichas(request):
                 'mensagem': mensagem}
     return render(request, 'listar_fichas.html', contexto)
 
-@secretaria_required
-def imprimir_ficha(request):
+# ---------------------------------------------------------------------------
+# Secretaria: imprimir / assinar / remover fichas
+#
+# As 21 views abaixo só escolhem o modelo (e o gerador de PDF); o trabalho e
+# o registro no log ficam nestes três helpers. O gerador é passado na chamada
+# (e não guardado num dicionário) para continuar "patchável" nos testes.
+# ---------------------------------------------------------------------------
+
+def _imprimir(request, modelo, gerador):
     if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(CatequeseInfantilModel, id=ficha_id)
+        ficha = get_object_or_404(modelo, id=request.POST.get('ficha_id'))
+        acao = LogFicha.REIMPRESSAO if ficha.ficha_impressa else LogFicha.IMPRESSAO
         ficha.ficha_impressa = True
         ficha.save()
-        pdf_path = gerar_ficha_catequese(ficha)
+        registrar_log(acao, ficha, request.user)
+        pdf_path = gerador(ficha)
         return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
     return redirect('core:listar_fichas')
+
+def _assinar(request, modelo):
+    if request.method == 'POST':
+        ficha = get_object_or_404(modelo, id=request.POST.get('ficha_id'))
+        ficha.ficha_assinada = True
+        ficha.save()
+        registrar_log(LogFicha.ASSINATURA, ficha, request.user)
+    return redirect('core:listar_fichas')
+
+def _remover(request, modelo):
+    if request.method == 'POST':
+        ficha = get_object_or_404(modelo, id=request.POST.get('ficha_id'))
+        with transaction.atomic():
+            registrar_log(LogFicha.REMOCAO, ficha, request.user)  # antes: depois do delete não há id
+            ficha.delete()
+    return redirect('core:listar_fichas')
+
+@secretaria_required
+def imprimir_ficha(request):
+    return _imprimir(request, CatequeseInfantilModel, gerar_ficha_catequese)
 
 @secretaria_required
 def assinar_ficha(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(CatequeseInfantilModel, id=ficha_id)
-        ficha.ficha_assinada = True
-        ficha.save()
-    return redirect('core:listar_fichas')
+    return _assinar(request, CatequeseInfantilModel)
 
 @secretaria_required
 def remover_ficha(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(CatequeseInfantilModel, id=ficha_id)
-        ficha.delete()
-    return redirect('core:listar_fichas')
+    return _remover(request, CatequeseInfantilModel)
 
 @secretaria_required
 def imprimir_ficha_sementinha(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(SementinhaModel, id=ficha_id)
-        ficha.ficha_impressa = True
-        ficha.save()
-        pdf_path = gerar_ficha_sementinha(ficha)
-        return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
-    return redirect('core:listar_fichas')
+    return _imprimir(request, SementinhaModel, gerar_ficha_sementinha)
 
 @secretaria_required
 def assinar_ficha_sementinha(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(SementinhaModel, id=ficha_id)
-        ficha.ficha_assinada = True
-        ficha.save()
-    return redirect('core:listar_fichas')
+    return _assinar(request, SementinhaModel)
 
 @secretaria_required
 def remover_ficha_sementinha(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(SementinhaModel, id=ficha_id)
-        ficha.delete()
-    return redirect('core:listar_fichas')
+    return _remover(request, SementinhaModel)
 
 @secretaria_required
 def imprimir_ficha_crisma(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(CrismaModel, id=ficha_id)
-        ficha.ficha_impressa = True
-        ficha.save()
-        pdf_path = gerar_ficha_crisma(ficha)
-        return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
-    return redirect('core:listar_fichas')
+    return _imprimir(request, CrismaModel, gerar_ficha_crisma)
 
 @secretaria_required
 def assinar_ficha_crisma(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(CrismaModel, id=ficha_id)
-        ficha.ficha_assinada = True
-        ficha.save()
-    return redirect('core:listar_fichas')
+    return _assinar(request, CrismaModel)
 
 @secretaria_required
 def remover_ficha_crisma(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(CrismaModel, id=ficha_id)
-        ficha.delete()
-    return redirect('core:listar_fichas')
+    return _remover(request, CrismaModel)
 
 @secretaria_required
 def imprimir_ficha_perseveranca_mej(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(Perseveranca_MEJ_Model, id=ficha_id)
-        ficha.ficha_impressa = True
-        ficha.save()
-        pdf_path = gerar_ficha_perseveranca_mej(ficha)
-        return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
-    return redirect('core:listar_fichas')
+    return _imprimir(request, Perseveranca_MEJ_Model, gerar_ficha_perseveranca_mej)
 
 @secretaria_required
 def assinar_ficha_perseveranca_mej(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(Perseveranca_MEJ_Model, id=ficha_id)
-        ficha.ficha_assinada = True
-        ficha.save()
-    return redirect('core:listar_fichas')
+    return _assinar(request, Perseveranca_MEJ_Model)
 
 @secretaria_required
 def remover_ficha_perseveranca_mej(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(Perseveranca_MEJ_Model, id=ficha_id)
-        ficha.delete()
-    return redirect('core:listar_fichas')
+    return _remover(request, Perseveranca_MEJ_Model)
 
 @secretaria_required
 def imprimir_ficha_adulto(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(CatequeseAdultoModel, id=ficha_id)
-        ficha.ficha_impressa = True
-        ficha.save()
-        pdf_path = gerar_ficha_catequese_adulto(ficha)
-        return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
-    return redirect('core:listar_fichas')
+    return _imprimir(request, CatequeseAdultoModel, gerar_ficha_catequese_adulto)
 
 @secretaria_required
 def assinar_ficha_adulto(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(CatequeseAdultoModel, id=ficha_id)
-        ficha.ficha_assinada = True
-        ficha.save()
-    return redirect('core:listar_fichas')
+    return _assinar(request, CatequeseAdultoModel)
 
 @secretaria_required
 def remover_ficha_adulto(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(CatequeseAdultoModel, id=ficha_id)
-        ficha.delete()
-    return redirect('core:listar_fichas')
+    return _remover(request, CatequeseAdultoModel)
 
 @secretaria_required
 def imprimir_ficha_noivos(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(NoivoModel, id=ficha_id)
-        ficha.ficha_impressa = True
-        ficha.save()
-        pdf_path = gerar_ficha_noivos(ficha)
-        return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
-    return redirect('core:listar_fichas')
+    return _imprimir(request, NoivoModel, gerar_ficha_noivos)
 
 @secretaria_required
 def assinar_ficha_noivos(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(NoivoModel, id=ficha_id)
-        ficha.ficha_assinada = True
-        ficha.save()
-    return redirect('core:listar_fichas')
+    return _assinar(request, NoivoModel)
 
 @secretaria_required
 def remover_ficha_noivos(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(NoivoModel, id=ficha_id)
-        ficha.delete()
-    return redirect('core:listar_fichas')
+    return _remover(request, NoivoModel)
 
 @secretaria_required
 def imprimir_ficha_coroinhas(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(CoroinhaModel, id=ficha_id)
-        ficha.ficha_impressa = True
-        ficha.save()
-        pdf_path = gerar_ficha_coroinhas(ficha)
-        return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf')
-    return redirect('core:listar_fichas')
+    return _imprimir(request, CoroinhaModel, gerar_ficha_coroinhas)
 
 @secretaria_required
 def assinar_ficha_coroinhas(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(CoroinhaModel, id=ficha_id)
-        ficha.ficha_assinada = True
-        ficha.save()
-    return redirect('core:listar_fichas')
+    return _assinar(request, CoroinhaModel)
 
 @secretaria_required
 def remover_ficha_coroinhas(request):
-    if request.method == 'POST':
-        ficha_id = request.POST.get('ficha_id')
-        ficha = get_object_or_404(CoroinhaModel, id=ficha_id)
-        ficha.delete()
-    return redirect('core:listar_fichas')
+    return _remover(request, CoroinhaModel)
 
 @coordenacao_required
 def total(request):
@@ -732,7 +623,13 @@ def transferir_ficha_pastoral(request, origem, ficha_id, destino=None):
         form = AjustePastoralForm(request.POST, **kwargs)
         if form.is_valid():
             dados = {nome: form.cleaned_data[nome] for nome in CAMPOS_RESPONSAVEL if nome in form.cleaned_data}
-            nova = transferir_ficha(ficha, config['modelo'], form.cleaned_data['turma'], **dados)
+            id_origem = ficha.pk
+            with transaction.atomic():
+                nova = transferir_ficha(ficha, config['modelo'], form.cleaned_data['turma'], **dados)
+                registrar_log(
+                    LogFicha.TRANSFERENCIA, nova, request.user,
+                    detalhe=f"De {contexto['titulo_origem']} (ficha nº {id_origem}) para {config['titulo']}",
+                )
             messages.success(
                 request,
                 f"Ficha de {nova.nome} transferida de {contexto['titulo_origem']} para {config['titulo']}.",
@@ -747,3 +644,56 @@ def transferir_ficha_pastoral(request, origem, ficha_id, destino=None):
         perdidos=campos_perdidos(ficha, config['modelo']),
     )
     return render(request, 'ajuste_pastoral_transferir.html', contexto)
+
+
+# ---------------------------------------------------------------------------
+# Logs -- a coordenação consulta o histórico de ações sobre as fichas
+# (somente leitura: não há edição nem remoção de registros pela tela)
+# ---------------------------------------------------------------------------
+
+LOGS_POR_PAGINA = 50
+
+
+@coordenacao_required
+def logs_fichas(request):
+    filtros = {
+        'acao': request.GET.get('acao', ''),
+        'pastoral': request.GET.get('pastoral', ''),
+        'usuario': request.GET.get('usuario', ''),
+        'de': request.GET.get('de', ''),
+        'ate': request.GET.get('ate', ''),
+        'busca': request.GET.get('busca', '').strip(),
+    }
+    logs = LogFicha.objects.all()
+    if filtros['acao'] in dict(LogFicha.ACOES):
+        logs = logs.filter(acao=filtros['acao'])
+    if filtros['pastoral'] in dict(LogFicha.PASTORAIS):
+        logs = logs.filter(pastoral=filtros['pastoral'])
+    if filtros['usuario']:
+        logs = logs.filter(usuario_nome=filtros['usuario'])
+    if filtros['busca']:
+        logs = logs.filter(nome_ficha__icontains=filtros['busca'])
+    try:
+        if filtros['de']:
+            logs = logs.filter(criado_em__date__gte=date.fromisoformat(filtros['de']))
+        if filtros['ate']:
+            logs = logs.filter(criado_em__date__lte=date.fromisoformat(filtros['ate']))
+    except ValueError:
+        messages.error(request, 'Data inválida no filtro de período.')
+
+    pagina = Paginator(logs, LOGS_POR_PAGINA).get_page(request.GET.get('pagina'))
+    # Mantém os filtros ao trocar de página
+    parametros = request.GET.copy()
+    parametros.pop('pagina', None)
+
+    contexto = {
+        'pagina': pagina,
+        'filtros': filtros,
+        'filtrando': any(filtros.values()),
+        'acoes': LogFicha.ACOES,
+        'pastorais': LogFicha.PASTORAIS,
+        'usuarios': LogFicha.objects.order_by('usuario_nome')
+                                    .values_list('usuario_nome', flat=True).distinct(),
+        'querystring': parametros.urlencode(),
+    }
+    return render(request, 'logs_fichas.html', contexto)
