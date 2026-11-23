@@ -13,7 +13,23 @@ from ._common import (
 )
 
 
-def gerar_ficha_catequese(ficha, titulo="INSCRIÇÃO PARA CATEQUESE INFANTIL", prefixo="ficha_catequese"):
+TEXTO_CAMPO_BIBLIA = "Bíblia: " + "_" * 22
+
+
+def desenhar_campo_biblia(c, y):
+    """Campo "Bíblia: ____" para a secretaria anotar à caneta a situação da criança
+    (já possui, vai comprar na secretaria etc.).
+
+    Fica na coluna da esquerda, na mesma linha do "Rio Claro, ..." e acima do
+    traço do "Documento verificado por" (que começa duas linhas abaixo). ``y``
+    é o mesmo usado nos Frames da assinatura e da verificação.
+    """
+    frame = Frame(50, y, 190, 200)
+    frame.addFromList([Paragraph(TEXTO_CAMPO_BIBLIA, estilo_paragrafo())], c)
+
+
+def gerar_ficha_catequese(ficha, titulo="INSCRIÇÃO PARA CATEQUESE INFANTIL", prefixo="ficha_catequese",
+                          campo_biblia=True):
     img_path = CABECALHO_PATH
     c, height, filename = novo_canvas(f"{prefixo}_{ficha.id}.pdf")
 
@@ -203,10 +219,9 @@ def gerar_ficha_catequese(ficha, titulo="INSCRIÇÃO PARA CATEQUESE INFANTIL", p
     )
     frame = Frame(250, height - 940, 500, 200)
     frame.addFromList([paragrafo], c)
+    if campo_biblia:
+        desenhar_campo_biblia(c, height - 940)
     desenhar_verificacao_secretaria(c, height - 940)
-    
-    
-    
 
     c.showPage()  # Página 2
     pagina_termo_consentimento_menor_catequese(c, img_path, height, ficha)
@@ -220,7 +235,7 @@ def gerar_ficha_catequese(ficha, titulo="INSCRIÇÃO PARA CATEQUESE INFANTIL", p
 
 
 def gerar_ficha_sementinha(ficha):
-    """A Sementinha tem os mesmos dados da Catequese Infantil; muda só o título."""
+    """A Sementinha tem os mesmos dados da Catequese Infantil; muda o título e não tem o campo Bíblia."""
     return gerar_ficha_catequese(
-        ficha, titulo="INSCRIÇÃO PARA SEMENTINHA", prefixo="ficha_sementinha",
+        ficha, titulo="INSCRIÇÃO PARA SEMENTINHA", prefixo="ficha_sementinha", campo_biblia=False,
     )
